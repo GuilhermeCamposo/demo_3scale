@@ -46,42 +46,65 @@ Once the playbook is done, you may deploy the sample applications:
 
 Some steps need to be done using 3scale's console.
 
-1. Enable portal
+==== Enable portal
 
 Remove code on: https://${3scale-admin-portal}/site/dns
 
-2. Update Provider Name
+==== Update Provider Name
 
 add a name for the provider here: https://${3scale-admin-portal}/p/admin/account/edit
 
-3. Update Developer Portal website
+==== Update Developer Portal website
 
+In the `portal` folder you will find customization for the Developer Portal. Replace those files content using 3scale CMS tool.
+
+There are two new *pages* in there, `doc.css` and `doc.js`, when creating those pages, remember:
+
+. set the right mime-type in the advanced options
+. set the right path for them: css and javascript
+
+modifications:
+
+Multiple plans
+
+image::docs/imgs/pick-plans.PNG[Multiple plans selection]
+
+Search docs
+
+image::docs/imgs/search-doc.PNG[Search DOC]
+
+Select API
+
+image::docs/imgs/select-api.PNG[Select API]
 
 == Using 3scale CLI
 
-=== Login
+=== Connect to tenants
 
-    UAT_TOKEN=f87d3a11fa7d92657c49e6f1d6b255c9cec2b38a214d8766cd4168b77719091a
-    PROD_TOKEN=961e2751ed9d26c7e7bc4ad9383d9d57b167b1a6b6bab94b05fb1ff97d352a0f
+export `UAT_TOKEN`, `PROD_TOKEN` and `DOMAIN` as environment variables, then run the following command.
 
     3scale remote add -k uat https://${UAT_TOKEN}@uat-admin.apps.${DOMAIN}
     3scale remote add -k prod https://${PROD_TOKEN}@prod-admin.apps.${DOMAIN}
 
-=== Migrate Database API
+=== Copy Database API Backend and Product
 
-    3scale backend copy -k -s uat -d prod database-backend
-    3scale product copy -k -s uat -d prod database-backend
+    3scale backend copy -k -s prod -d uat database-backend
+    3scale product copy -k -s prod -d uat database-api
 
-    3scale application-plan export origin database-backend basic -k > basic-plan.yml
-    3scale application-plan import copy -f basic-plan.yml database-backend -k
+=== Copy Database API Application Plan
 
-To migrate the application:
+    3scale application-plan export prod database-api basic -k > basic-plan.yml
+    3scale application-plan import uat -f basic-plan.yml database-api -k
 
-3scale application show -k -o yaml origin 13
+=== Create an Application for the new Environment
 
-3scale account find copy admin+test@example.com -a -k
+Find an account:
 
-3scale application create -k copy 5 6 basic 'Test App' --application-id=83265dcf --application-key=bbb3204c3471e7b710c3e8367a7af6e0 --redirect-url=' ' --description='test'
+    3scale account find uat admin+test@example.com -a -k
+
+Create the application with the account information:
+
+    3scale application create -k uat ${ACCOUNT_ID} ${SERVICE_ID} basic 'Test App' --application-id=${APP_ID} --application-key=${USER_KEY} --redirect-url=' ' --description='some description'
 
 
 == Customizing Resources Already Created
