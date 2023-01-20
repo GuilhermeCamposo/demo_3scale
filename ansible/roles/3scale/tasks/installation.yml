@@ -1,0 +1,88 @@
+- name: Evaluate '{{ threescale_project }}' namespace
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Namespace
+    name: '{{ threescale_project }}'
+    state: present
+
+- name: Evaluate 3scale Operator
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', '3scale-operator.yml.j2') }}"
+
+- name: Wait 3scale Operator
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Pod
+    namespace: '{{ threescale_project }}'
+    label_selectors:
+      - app = 3scale-api-management
+      - rht.comp = 3scale
+      - rht.subcomp = 3scale_operator
+    field_selectors:
+      - status.phase=Running
+  register: r_3scale_operator_pod
+  retries: 20
+  delay: 10
+  until: r_3scale_operator_pod.resources | list | length == 1
+
+- name: Install Minio
+  include_role:
+    name: minio
+
+- name: Evaluate 3scale Operator s3-secret
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', 's3-secret.yml.j2') }}"
+
+- name: Evaluate 3scale APIManager
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', '3scale-instance.yml.j2') }}"
+
+- name: Wait for 3scale pods to be ready
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: apps.3scale.net/v1alpha1
+    kind: APIManager
+    namespace: '{{ threescale_project }}'
+    name: example-apimanager
+  register: api_m
+  until:
+    - api_m is defined
+    - api_m.resources[0].status.deployments.ready[14] is defined
+  retries: 20
+  delay: 30
+
+- name: Evaluate UAT Tenant Secret
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', 'uat_admin_secret.yml.j2') }}"
+
+- name: Evaluate UAT Tenant
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', 'uat_tenant.yml.j2') }}"

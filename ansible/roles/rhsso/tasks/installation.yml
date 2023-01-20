@@ -1,0 +1,83 @@
+- name: Evaluate '{{ rhsso_project }}' namespace
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Namespace
+    name: '{{ rhsso_project }}'
+    state: present
+
+- name: Evaluate '{{ rhsso_project }}' OperatorGroup
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: operators.coreos.com/v1
+    kind: OperatorGroup
+    definition:
+      metadata:
+        name: rhsso-group
+        namespace: '{{ rhsso_project }}'
+      spec:
+        targetNamespaces:
+        - '{{ rhsso_project }}'
+
+- name: Evaluate SSO Subscription
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    kind: Subscription
+    api_version: operators.coreos.com/v1alpha1
+    definition:
+      metadata:
+        name: rhsso-operator
+        namespace: '{{ rhsso_project }}'
+      spec:
+        channel: stable
+        installPlanApproval: Automatic
+        name: rhsso-operator
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+        startingCSV: rhsso-operator.7.5.1-opr-010
+
+- name: Wait for SSO operator to install
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: keycloaks.keycloak.org
+  register: crd_sso
+  until: crd_sso.resources | list | length == 1
+  retries: 10
+  delay: 30
+
+- name: Evaluate SSO Instance
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    kind: Keycloak
+    api_version: keycloak.org/v1alpha1
+    definition:
+      metadata:
+        name: example-keycloak
+        namespace: '{{ rhsso_project }}'
+      spec:
+        externalAccess:
+          enabled: true
+        instances: 1
+
+- name: Wait for SSO to be running
+  uri:
+    url: https://keycloak-{{ rhsso_project }}.{{ route_subdomain }}
+    status_code: '200'
+  register: result
+  until: result.status == 200
+  retries: 90
+  delay: 30

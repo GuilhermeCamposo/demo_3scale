@@ -1,0 +1,61 @@
+<div class="row">
+  <div class="col-md-9">
+    <table class="table panel panel-default" id="applications">
+      <thead class="panel-heading">
+        <tr>
+          <th>Name</th>
+          {% if provider.services.size > 1 %}
+            <th>Service</th>
+          {% endif %}
+          <th>Credentials</th>
+          <th>State</th>
+          <th>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="panel-body">
+        {% for application in applications %}
+          <tr class="{% cycle 'applications': 'odd', 'even' %}" id="application_{{ application.id }}">
+            <td>
+              {{ application.name | link_to: application.url }}
+            </td>
+            {% if provider.services.size > 1 %}
+              <td>{{ application.service.name }}</td>
+            {% endif %}
+            <td>{{ application.key }}</td>
+            <td>{{ application.state }}</td>
+            <td>
+              {% if application.can.be_updated? %}
+                <a href="{{ application.edit_url }}">
+                  <i class="fa fa-pencil"></i>
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="panel-footer">
+      </tfoot>
+    </table>
+
+         {% if current_user.can.create_application? %}
+		  <div class='card-body bg-catalog app-creation-list'>
+            <h2>Select service</h2>
+            <p>In order to create an application, select one of the services you are subscribed to.</p>
+
+            <dl class="select-service-list">
+              {% for service in provider.services %}
+                <dt class="service">
+                  <a href="{{ urls.new_application }}?service_id={{ service.system_name }}" class="btn btn-primary">{{ service.name }}</a>
+                </dt>
+                <dd>{{ service.description }}</dd>
+              {% endfor %}
+            </dl>
+          </div>  
+         {% endif %}
+    
+    
+    {% include 'shared/pagination' with pagination %}
+
+  </div>
+</div>

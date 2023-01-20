@@ -1,0 +1,70 @@
+- hosts: localhost
+  name: Install 3scale Demo
+  vars:
+    verify_tls: false
+    insecure_skip_tls_verify: true
+    minio_stateful: false
+    threescale_project: demo-3scale
+    rhsso_project: demo-rhsso
+    apps_project: demo-apps
+    apicurito_project: demo-tools
+    microcks_project: demo-tools
+    mailhog_project: demo-tools
+    # 3scale SSO
+    threescale_client_id: threescale
+    threescale_client_secret: d141e6ca-707a-4de9-a9c2-696d21890b37
+    enable_user_workload_monitoring: true
+    grafana_password: 3scale
+    grafana_user: admin
+    microcks_username: admin
+    microcks_password: 3scale
+  tasks:
+    - name: Check Required Parameters
+      fail: msg="This play requires 'server' and 'token' to be defined"
+      when:
+        - (server is not defined) or (token is not defined) or (server is none) or (token is none)
+      ignore_errors: no
+
+    - name: Set domain
+      set_fact:
+        domain : "{{ server | regex_replace('https://api.') | regex_replace(':6443') }}"
+
+    - name: Set Subdomain
+      set_fact:
+        route_subdomain: "apps.{{ domain }}"
+
+    - name: login as super user with token on OpenShift 4
+      command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
+      when:
+       - token is defined
+       - token is not none
+       - token|trim() != ""
+      ignore_errors: no
+
+    - name: Include RHSSO
+      include_role:
+        name: rhsso
+
+    - name: Include Mailhog
+      include_role:
+        name: mailhog
+
+    - name: Include Monitoring
+      include_role:
+        name: monitoring
+    
+    - name: Include Microcks
+      include_role:
+        name: microcks
+
+    - name: Include Apicurito
+      include_role:
+        name: apicurito
+
+    - name: Include 3scale
+      include_role:
+        name: 3scale
+
+    - name: Include Apps
+      include_role:
+        name: apps

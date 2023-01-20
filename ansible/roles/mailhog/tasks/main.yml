@@ -1,0 +1,39 @@
+- name: Evaluate {{ mailhog_project }} namespace
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: v1
+    kind: Namespace
+    name: '{{ mailhog_project }}'
+    state: present
+
+- name: Evaluate Mailhog Manifests
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    namespace: '{{ mailhog_project }}'
+    resource_definition: "{{ lookup('file',item) }}"
+  with_items:
+    - deployment.yml
+    - svc.yml
+    - route.yml
+
+- name: Wait Mailhog Instance
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: v1
+    kind: Pod
+    namespace: '{{ mailhog_project }}'
+    label_selectors:
+      - deployment = mailhog
+    field_selectors:
+      - status.phase=Running
+  register: r_mailhog_pod
+  retries: 20
+  delay: 10
+  until: r_mailhog_pod.resources | list | length == 1

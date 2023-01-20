@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "6f8eb3e1-4307-48d8-9f37-71b75e56c3fc",
+		"name": "demo_3scale-apps",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "720292"
+	},
+	"item": [
+		{
+			"name": "backend - save",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICItRXhjZGN5eC1YSG1ocG9WQ3cxU1NNdl8tQXN1TmNhS1ZVMGxsVVFhWjk4In0.eyJleHAiOjE2NDk0MjEyOTAsImlhdCI6MTY0OTQyMDk5MCwianRpIjoiMzZmMjExMDMtZDAxOS00ZDdjLWE1ODAtNDgzN2RlYWI2NzQ5IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay1kZW1vLXJoc3NvLmFwcHMuY2x1c3Rlci1sZDhwbC5sZDhwbC5zYW5kYm94MTExMi5vcGVudGxjLmNvbS9hdXRoL3JlYWxtcy90aHJlZXNjYWxlLWFwcHMiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMmNkZTM5ZmItYmM0Yi00NjA2LWIzOTAtY2QyNTExNzUzMDg3IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiODMyNjVkY2YiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy10aHJlZXNjYWxlLWFwcHMiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudElkIjoiODMyNjVkY2YiLCJjbGllbnRIb3N0IjoiMzguMTUuMjI2LjU2IiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzZXJ2aWNlLWFjY291bnQtODMyNjVkY2YiLCJjbGllbnRBZGRyZXNzIjoiMzguMTUuMjI2LjU2In0.IBdeLc8cZlayST2BEAMnvztpltmOFjCsaLyQ7QZ8V1kjIiPOpKywqM28Lqh0bU9fcdQet2JEQO0g8JWUpaCmUTkrgduzMd0VKNUUKxEg4gKFFLtjzuCZQGXULSfpdDTVfeMhILC2OXD0sgXPLfKLElQxsEjD3bLewHwEti611U-FiyVWpvuXKvgBgi3M-Oca7cM2JMxlFzecAa2gd6YMbZeUx2UT9NXfFDaVGVVpzbv-R2q8jdXC0_xrPgCBQC5XX90bgbRM9jyJ1D3eqoXU3SEPo2GmkoaSAa2dMNXFzoaa40Wi-b008CeTTLcCXQQ242VDzp0AamI0lrZMMeRckQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"test\", \"email\": \"test@gmail.com\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://database-backend-origin-apicast-staging.apps.cluster-ld8pl.ld8pl.sandbox1112.opentlc.com:443/backend",
+					"protocol": "https",
+					"host": [
+						"database-backend-origin-apicast-staging",
+						"apps",
+						"cluster-ld8pl",
+						"ld8pl",
+						"sandbox1112",
+						"opentlc",
+						"com"
+					],
+					"port": "443",
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "backend - list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/backend",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "frontend - save",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"noia\", \"email\": \"noia@gmail.com\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://api-frontend-demo-3scale-apps.apps.cluster-cjjwm.cjjwm.sandbox783.opentlc.com/frontend",
+					"protocol": "http",
+					"host": [
+						"api-frontend-demo-3scale-apps",
+						"apps",
+						"cluster-cjjwm",
+						"cjjwm",
+						"sandbox783",
+						"opentlc",
+						"com"
+					],
+					"path": [
+						"frontend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "frontend - list",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://api-frontend-demo-3scale-apps.apps.cluster-cjjwm.cjjwm.sandbox783.opentlc.com/frontend",
+					"protocol": "http",
+					"host": [
+						"api-frontend-demo-3scale-apps",
+						"apps",
+						"cluster-cjjwm",
+						"cjjwm",
+						"sandbox783",
+						"opentlc",
+						"com"
+					],
+					"path": [
+						"frontend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "83265dcf",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "bbb3204c3471e7b710c3e8367a7af6e0",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://keycloak-demo-rhsso.apps.cluster-ld8pl.ld8pl.sandbox1112.opentlc.com/auth/realms/threescale-apps/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"keycloak-demo-rhsso",
+						"apps",
+						"cluster-ld8pl",
+						"ld8pl",
+						"sandbox1112",
+						"opentlc",
+						"com"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"threescale-apps",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

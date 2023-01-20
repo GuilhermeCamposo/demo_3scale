@@ -1,0 +1,5 @@
+- name: RH-SSO installation
+  include_tasks: installation.yml
+
+- name: RH-SSO configuration
+  include_tasks: configuration.yml

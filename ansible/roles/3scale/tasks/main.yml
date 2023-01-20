@@ -1,0 +1,5 @@
+- name: 3scale installation
+  include_tasks: installation.yml
+
+- name: 3scale configuration
+  include_tasks: configuration.yml

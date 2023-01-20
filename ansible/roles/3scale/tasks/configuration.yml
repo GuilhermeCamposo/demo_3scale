@@ -1,0 +1,149 @@
+- name: Get system-seed secret
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Secret
+    name:  system-seed
+    namespace: '{{ threescale_project }}'
+    api_version: v1
+  register: r_system_seed
+  until:
+    - r_system_seed.resources is defined
+    - r_system_seed.resources[0] is defined
+  retries: 10
+  delay: 15
+
+- name: Set admin token
+  set_fact:
+    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
+
+- name: Test 3scale API Service
+  uri:
+    url: https://prod-admin.apps.{{ domain }}/admin/api/services.json
+    validate_certs: false
+    body_format: form-urlencoded
+    method: GET
+    body:
+      access_token: '{{ threescale_token }}'
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 15
+
+- name: Evaluate Database Backend
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', 'database_backend.yml.j2') }}"
+
+- name: Check if Database Backend is Synced
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Backend
+    name:  database-backend
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_backend
+  until:
+    - r_backend.resources is defined
+    - r_backend.resources[0].status.backendId is defined
+  retries: 10
+  delay: 15
+
+- name: Evaluate Database Product
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    resource_definition: "{{ lookup('template', 'database-product.yml.j2') }}"
+
+- name: Check if Database Product is Synced
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Product
+    name:  database-api
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_product
+  until:
+    - r_product.resources is defined
+    - r_product.resources[0].status.productId is defined
+  retries: 10
+  delay: 15
+
+- name: Set productId
+  set_fact:
+    product_id: '{{ r_product.resources[0].status.productId }}'
+
+- name: Create Application Plan
+  uri:
+    url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/application_plans.json
+    validate_certs: false
+    method: POST
+    body:
+      access_token: '{{ threescale_token }}'
+      approval_required: 'false'
+      system_name: basic
+      state_event: publish
+      name: Basic
+    body_format: form-urlencoded
+    status_code: 200,201,204
+  register: r_application_plan
+
+# Using the default account
+- name: Create Application
+  uri:
+    url: https://prod-admin.apps.{{ domain }}/admin/api/accounts/3/applications.json
+    validate_certs: false
+    method: POST
+    body:
+      access_token: '{{ threescale_token }}'
+      plan_id: '{{ r_application_plan.json.application_plan.id }}'
+      name: test-app
+      description: 'Test App for the demo'
+    body_format: form-urlencoded
+    status_code: 200,201,204
+  register: r_application
+
+- name: Set Backend client_id
+  set_fact:
+    backend_client_id: '{{ r_application.json.application.client_id }}'
+
+- name: Set Backend client_secret
+  set_fact:
+    backend_client_secret: '{{ r_application.json.application.client_secret }}'
+
+- name: Deploy to Staging
+  uri:
+    url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/proxy/deploy.json
+    validate_certs: false
+    method: POST
+    body:
+      access_token: '{{ threescale_token }}'
+    body_format: form-urlencoded
+    status_code: 200,201,204
+  register: r_application
+
+- name: Config 3scale SMTP address
+  command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
+  ignore_errors: no
+
+- name: Config 3scale SMTP port
+  command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
+  ignore_errors: no
+
+- name: Bounce 3scale system-app
+  command: "oc rollout latest dc/system-app -n {{ threescale_project }}"
+  ignore_errors: no
+
+- name: Bounce 3scale system-sidekiq
+  command: "oc rollout latest dc/system-sidekiq -n {{ threescale_project }}"
+  ignore_errors: no

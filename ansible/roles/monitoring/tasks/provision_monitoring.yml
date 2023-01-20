@@ -1,0 +1,132 @@
+- name: Evaluate '{{ threescale_project }}' namespace
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: v1
+    kind: Namespace
+    name: '{{ threescale_project }}'
+    state: present
+
+- name: Evaluate '{{ threescale_project }}' Group
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    kind: OperatorGroup
+    api_version: operators.coreos.com/v1
+    namespace: '{{ threescale_project }}'
+    definition:
+      metadata:
+        name: '{{ threescale_project }}-group'
+      spec:
+        targetNamespaces:
+        - '{{ threescale_project }}'
+
+- name: Evaluate User Workload Monitoring
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    kind: ConfigMap
+    api_version: v1
+    definition:
+      metadata:
+        name: cluster-monitoring-config
+        namespace: openshift-monitoring
+      data:
+        config.yaml: |
+          enableUserWorkload: true
+
+- name: Evaluate Grafana Operator
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    kind: Subscription
+    api_version: operators.coreos.com/v1alpha1
+    definition:
+      metadata:
+        name: grafana-operator
+        namespace: '{{ threescale_project }}'
+      spec:
+        channel: v4
+        installPlanApproval: Automatic
+        name: grafana-operator
+        source: community-operators
+        sourceNamespace: openshift-marketplace
+
+- name: Wait Grafana Operator
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: v1
+    kind: Pod
+    namespace: '{{ threescale_project }}'
+    label_selectors:
+      - control-plane = controller-manager
+    field_selectors:
+      - status.phase=Running
+      - spec.serviceAccountName=grafana-operator-controller-manager
+  register: r_grafana_operator_pod
+  retries: 20
+  delay: 10
+  until: r_grafana_operator_pod.resources | list | length == 1
+
+- name: Evaluate Grafana Cluster Files
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: no
+    state: present
+    resource_definition: "{{ lookup('file', item ) }}"
+  loop:
+    - grafana_cluster_role.yml
+
+- name: Evaluate Grafana Files
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: no
+    state: present
+    namespace: '{{ threescale_project }}'
+    resource_definition: "{{ lookup('file', item ) }}"
+  loop:
+    - grafana_sa.yml
+    - grafana_session_secret.yml
+    - grafana_cm.yml
+
+
+- name: Evaluate Grafana Templates
+  k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: no
+    state: present
+    namespace: '{{ threescale_project }}'
+    resource_definition: "{{ lookup('template', item ) }}"
+  loop:
+    -  grafana_binding.yml.j2
+  #  -  grafana_instance.yml.j2
+    -  grafana_oauth.yml.j2
+
+- name: Wait Grafana Instance
+  k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    api_version: v1
+    kind: Pod
+    namespace: '{{ threescale_project }}'
+    label_selectors:
+      - app = grafana
+    field_selectors:
+      - status.phase=Running
+  register: r_grafana_pod
+  retries: 20
+  delay: 10
+  until: r_grafana_pod.resources | list | length == 1

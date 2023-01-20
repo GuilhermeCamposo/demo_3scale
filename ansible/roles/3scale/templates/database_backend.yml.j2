@@ -1,0 +1,23 @@
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Backend
+metadata:
+  name: database-backend
+  namespace: '{{ threescale_project }}'
+spec:
+  mappingRules:
+    - httpMethod: POST
+      increment: 1
+      metricMethodRef: calls
+      pattern: /
+    - httpMethod: GET
+      increment: 1
+      metricMethodRef: calls
+      pattern: /
+  metrics:
+    calls:
+      description: Number of API hits
+      friendlyName: Backend Hits
+      unit: hit
+  name: Database Backend
+  privateBaseURL: 'http://database-backend.{{ apps_project }}:80'
+  systemName: database-backend

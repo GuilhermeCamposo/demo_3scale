@@ -1,0 +1,125 @@
+= Comprehensive 3scale Demo
+
+This repository demonstrates how to use many of 3scale's features.
+
+== Environment
+
+- OCP 4.10
+- oc client >= 4.10
+- 3scale 2.13
+
+
+== 3scale Installation
+
+=== Parameters
+
+[options="header"]
+|=======================
+| Parameter | Example Value                                      | Definition
+| token     | sha256~vFanQbthlPKfsaldJT3bdLXIyEkd7ypO_XPygY1DNtQ | access token for a user with cluster-admin privileges
+| server    | https://api.mycluster.domain.com:6443              | OpenShift cluster API URL
+|=======================
+
+
+===  How to run the playbook
+
+    ansible-playbook -e token=${token} -e server=${server} playbook.yml
+
+
+=== Deploy the applications
+
+Once the playbook is done, you may deploy the sample applications:
+
+.1 Go to the correct project
+  oc project demo-apps
+
+.2 deploy the backend app
+  cd apps/database-backend
+  mvn clean package -Dquarkus.kubernetes.deploy=true
+
+.3 deploy the frontend API app
+  cd ../api-frontend
+  mvn clean package -Dquarkus.kubernetes.deploy=true
+
+
+=== Manual steps
+
+Some steps need to be done using 3scale's console.
+
+1. Enable portal
+
+Remove code on: https://${3scale-admin-portal}/site/dns
+
+2. Update Provider Name
+
+add a name for the provider here: https://${3scale-admin-portal}/p/admin/account/edit
+
+3. Update Developer Portal website
+
+
+== Using 3scale CLI
+
+=== Login
+
+    UAT_TOKEN=f87d3a11fa7d92657c49e6f1d6b255c9cec2b38a214d8766cd4168b77719091a
+    PROD_TOKEN=961e2751ed9d26c7e7bc4ad9383d9d57b167b1a6b6bab94b05fb1ff97d352a0f
+
+    3scale remote add -k uat https://${UAT_TOKEN}@uat-admin.apps.${DOMAIN}
+    3scale remote add -k prod https://${PROD_TOKEN}@prod-admin.apps.${DOMAIN}
+
+=== Migrate Database API
+
+    3scale backend copy -k -s uat -d prod database-backend
+    3scale product copy -k -s uat -d prod database-backend
+
+    3scale application-plan export origin database-backend basic -k > basic-plan.yml
+    3scale application-plan import copy -f basic-plan.yml database-backend -k
+
+To migrate the application:
+
+3scale application show -k -o yaml origin 13
+
+3scale account find copy admin+test@example.com -a -k
+
+3scale application create -k copy 5 6 basic 'Test App' --application-id=83265dcf --application-key=bbb3204c3471e7b710c3e8367a7af6e0 --redirect-url=' ' --description='test'
+
+
+== Customizing Resources Already Created
+
+you may use 3scale-cms to update content you have in your developer portal. Here is how.
+
+=== Running the container image with Podman
+
+You may install `cms` or use a container image to run it. In my example I'm using the container image to map a local directory.
+
+----
+podman run -it -v /local/dev-portal:/tmp/dev-portal:Z quay.io/gcamposo/3scale-cms:1.0.0 /bin/bash
+----
+
+=== Using 3scale-cms
+
+In order to interact with https://github.com/hguerrero/3scale-cms[3scale-cms], we need some information about the provider exported as environment variables.
+
+[options="header"]
+|=======================
+| Parameter            | Example Value                                      | Definition
+| THREESCALE_KEY       | 76336020ad982fbefd9189e1202b2818                   | 3scale Provider Key. Can be find on: https://3scale-admin.apps.domain.com/p/admin/account
+| THREESCALE_URL       | https://3scale-admin.apps.domain.com               | Your 3scale server URL.
+|=======================
+
+Once you have the container running, you may use `cms` like this:
+
+----
+THREESCALE_KEY=
+THREESCALE_URL=
+
+cd /tmp/dev-portal
+cms $THREESCALE_KEY $THREESCALE_URL upload
+----
+
+[NOTE]
+====
+- 3scale-cms uses the modification timestamp to diff files. So it is necessary to touch files that were created before the 3scale instance.
+- 3scale-cms does not handle metadata relate to the file, like MIME type, layout and so on. Or you create the file first using 3scale console or you add that information in the console later.
+- new files are not automatically published. You will need to do that in the console later.
+====

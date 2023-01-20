@@ -1,0 +1,47 @@
+apiVersion: capabilities.3scale.net/v1beta1
+kind: Product
+metadata:
+  name: database-api
+  namespace: '{{ threescale_project }}'
+spec:
+  name: Database API
+  description: Database API Product
+  deployment:
+    apicastHosted:
+      authentication:
+        oidc:
+          issuerType: "keycloak"
+          issuerEndpoint: "https://{{ threescale_client_id }}:{{ threescale_client_secret }}@keycloak-demo-rhsso.apps.{{ domain }}/auth/realms/threescale-apps"
+          authenticationFlow:
+            standardFlowEnabled: false
+            implicitFlowEnabled: true
+            serviceAccountsEnabled: true
+            directAccessGrantsEnabled: true
+          jwtClaimWithClientID: "azp"
+          jwtClaimWithClientIDType: "plain"
+          credentials: "headers"
+  mappingRules:
+    - httpMethod: POST
+      increment: 1
+      metricMethodRef: save
+      pattern: /backend
+    - httpMethod: GET
+      increment: 1
+      metricMethodRef: list
+      pattern: /backend
+  methods:
+      save:
+        description: Save Attendees in the Backend
+        friendlyName: Save
+      list:
+        description: List Attendees saved in the Backend
+        friendlyName: List
+  policies:
+    - configuration: {}
+      enabled: true
+      name: apicast
+      version: builtin
+  systemName: database-api
+  backendUsages:
+    database-backend:
+      path: /
