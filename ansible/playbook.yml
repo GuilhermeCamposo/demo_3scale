@@ -10,6 +10,8 @@
     apicurito_project: demo-tools
     microcks_project: demo-tools
     mailhog_project: demo-tools
+    apicurio_registry_project: demo-tools
+    kafka_project: demo-tools
     # 3scale SSO
     threescale_client_id: threescale
     threescale_client_secret: d141e6ca-707a-4de9-a9c2-696d21890b37
@@ -69,3 +71,11 @@
     - name: Include Apps
       ansible.builtin.include_role:
         name: apps
+
+    - name: Include Streams
+      ansible.builtin.include_role:
+        name: streams
+
+    - name: Include Service Registry
+      ansible.builtin.include_role:
+        name: apicurio-registry
