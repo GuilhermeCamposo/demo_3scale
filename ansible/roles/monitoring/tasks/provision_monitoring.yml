@@ -1,5 +1,5 @@
-- name: Evaluate '{{ threescale_project }}' namespace
-  k8s:
+- name: Evaluate namespace {{ threescale_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -8,8 +8,8 @@
     name: '{{ threescale_project }}'
     state: present
 
-- name: Evaluate '{{ threescale_project }}' Group
-  k8s:
+- name: Evaluate Group {{ threescale_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -22,10 +22,10 @@
         name: '{{ threescale_project }}-group'
       spec:
         targetNamespaces:
-        - '{{ threescale_project }}'
+          - '{{ threescale_project }}'
 
 - name: Evaluate User Workload Monitoring
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -41,7 +41,7 @@
           enableUserWorkload: true
 
 - name: Evaluate Grafana Operator
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -60,7 +60,7 @@
         sourceNamespace: openshift-marketplace
 
 - name: Wait Grafana Operator
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -78,23 +78,23 @@
   until: r_grafana_operator_pod.resources | list | length == 1
 
 - name: Evaluate Grafana Cluster Files
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: no
+    validate_certs: false
     state: present
-    resource_definition: "{{ lookup('file', item ) }}"
+    resource_definition: "{{ lookup('file', item) }}"
   loop:
     - grafana_cluster_role.yml
 
 - name: Evaluate Grafana Files
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: no
+    validate_certs: false
     state: present
     namespace: '{{ threescale_project }}'
-    resource_definition: "{{ lookup('file', item ) }}"
+    resource_definition: "{{ lookup('file', item) }}"
   loop:
     - grafana_sa.yml
     - grafana_session_secret.yml
@@ -102,20 +102,20 @@
 
 
 - name: Evaluate Grafana Templates
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: no
+    validate_certs: false
     state: present
     namespace: '{{ threescale_project }}'
-    resource_definition: "{{ lookup('template', item ) }}"
+    resource_definition: "{{ lookup('template', item) }}"
   loop:
-    -  grafana_binding.yml.j2
+    - grafana_binding.yml.j2
   #  -  grafana_instance.yml.j2
-    -  grafana_oauth.yml.j2
+    - grafana_oauth.yml.j2
 
 - name: Wait Grafana Instance
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'

@@ -1,10 +1,10 @@
 - name: Get system-seed secret
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
     kind: Secret
-    name:  system-seed
+    name: system-seed
     namespace: '{{ threescale_project }}'
     api_version: v1
   register: r_system_seed
@@ -15,11 +15,11 @@
   delay: 15
 
 - name: Set admin token
-  set_fact:
+  ansible.builtin.set_fact:
     threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
 
 - name: Test 3scale API Service
-  uri:
+  ansible.builtin.uri:
     url: https://prod-admin.apps.{{ domain }}/admin/api/services.json
     validate_certs: false
     body_format: form-urlencoded
@@ -32,7 +32,7 @@
   delay: 15
 
 - name: Evaluate Database Backend
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -40,12 +40,12 @@
     resource_definition: "{{ lookup('template', 'database_backend.yml.j2') }}"
 
 - name: Check if Database Backend is Synced
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
     kind: Backend
-    name:  database-backend
+    name: database-backend
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
   register: r_backend
@@ -56,7 +56,7 @@
   delay: 15
 
 - name: Evaluate Database Product
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -64,12 +64,12 @@
     resource_definition: "{{ lookup('template', 'database-product.yml.j2') }}"
 
 - name: Check if Database Product is Synced
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
     kind: Product
-    name:  database-api
+    name: database-api
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
   register: r_product
@@ -80,11 +80,11 @@
   delay: 15
 
 - name: Set productId
-  set_fact:
+  ansible.builtin.set_fact:
     product_id: '{{ r_product.resources[0].status.productId }}'
 
 - name: Create Application Plan
-  uri:
+  ansible.builtin.uri:
     url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/application_plans.json
     validate_certs: false
     method: POST
@@ -100,7 +100,7 @@
 
 # Using the default account
 - name: Create Application
-  uri:
+  ansible.builtin.uri:
     url: https://prod-admin.apps.{{ domain }}/admin/api/accounts/3/applications.json
     validate_certs: false
     method: POST
@@ -114,15 +114,15 @@
   register: r_application
 
 - name: Set Backend client_id
-  set_fact:
+  ansible.builtin.set_fact:
     backend_client_id: '{{ r_application.json.application.client_id }}'
 
 - name: Set Backend client_secret
-  set_fact:
+  ansible.builtin.set_fact:
     backend_client_secret: '{{ r_application.json.application.client_secret }}'
 
 - name: Deploy to Staging
-  uri:
+  ansible.builtin.uri:
     url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/proxy/deploy.json
     validate_certs: false
     method: POST
@@ -133,17 +133,26 @@
   register: r_application
 
 - name: Config 3scale SMTP address
-  command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
-  ignore_errors: no
+  ansible.builtin.command: |
+    oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
+  ignore_errors: false
+  register: my_output
+  changed_when: my_output.rc != 0
 
 - name: Config 3scale SMTP port
-  command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
-  ignore_errors: no
+  ansible.builtin.command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
+  ignore_errors: false
+  register: my_output
+  changed_when: my_output.rc != 0
 
 - name: Bounce 3scale system-app
-  command: "oc rollout latest dc/system-app -n {{ threescale_project }}"
-  ignore_errors: no
+  ansible.builtin.command: "oc rollout latest dc/system-app -n {{ threescale_project }}"
+  ignore_errors: false
+  register: my_output
+  changed_when: my_output.rc != 0
 
 - name: Bounce 3scale system-sidekiq
-  command: "oc rollout latest dc/system-sidekiq -n {{ threescale_project }}"
-  ignore_errors: no
+  ansible.builtin.command: "oc rollout latest dc/system-sidekiq -n {{ threescale_project }}"
+  ignore_errors: false
+  register: my_output
+  changed_when: my_output.rc != 0

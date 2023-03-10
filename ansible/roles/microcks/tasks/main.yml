@@ -1,5 +1,5 @@
-- name: Evaluate {{microcks_project }} namespace
-  k8s:
+- name: Evaluate namespace {{ microcks_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -8,8 +8,8 @@
     name: '{{ microcks_project }}'
     state: present
 
-- name: Evaluate '{{ microcks_project }}' Group
-  k8s:
+- name: Evaluate Group {{ microcks_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -22,10 +22,10 @@
         name: '{{ microcks_project }}-group'
       spec:
         targetNamespaces:
-        - '{{ microcks_project }}'
+          - '{{ microcks_project }}'
 
 - name: Evaluate Microcks Subscription
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -33,7 +33,7 @@
     resource_definition: "{{ lookup('template', 'microcks-subscription.yaml.j2') }}"
 
 - name: Wait for Microcks operator to install
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -46,7 +46,7 @@
   delay: 30
 
 - name: Evaluate Microcks Install
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -54,7 +54,7 @@
     resource_definition: "{{ lookup('template', 'microcks-install.yaml.j2') }}"
 
 - name: Wait for Microcks to be running
-  uri:
+  ansible.builtin.uri:
     url: https://microcks-{{ microcks_project }}.{{ route_subdomain }}
     status_code: '200'
   register: result
@@ -63,16 +63,16 @@
   delay: 30
 
 - name: Wait for Microcks Keycloak to be running
-  uri:
+  ansible.builtin.uri:
     url: https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}
     status_code: '200'
   register: result
   until: result.status == 200
-  retries: 90
+  retries: 20
   delay: 30
 
 - name: Extract key_cloak_admin_password
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -82,14 +82,14 @@
   register: key_cloak_result
 
 - name: Set the username and password
-  set_fact:
+  ansible.builtin.set_fact:
     key_cloak_admin_password: "{{ key_cloak_result.resources[0].data.password | b64decode }}"
     key_cloak_admin_username: "{{ key_cloak_result.resources[0].data.username | b64decode }}"
 
 
 - name: Get Admin Token from Keycloack
-  uri:
-    url: https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/auth/realms/master/protocol/openid-connect/token
+  ansible.builtin.uri:
+    url: https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/realms/master/protocol/openid-connect/token
     method: POST
     body_format: form-urlencoded
     body:
@@ -101,13 +101,13 @@
   register: token_result
 
 - name: Extract Admin Token from Keycloack from result
-  set_fact:
-    admin_token: '{{token_result.json.access_token}}'
+  ansible.builtin.set_fact:
+    admin_token: '{{ token_result.json.access_token }}'
 
 
 - name: Increase Token Lifespan (60mins)
-  uri:
-    url: 'https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/auth/admin/realms/master'
+  ansible.builtin.uri:
+    url: 'https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/admin/realms/master'
     method: PUT
     body:
       realm: "master"
@@ -116,13 +116,13 @@
     headers:
       Content-Type: "application/json"
       Authorization: "Bearer {{ admin_token }}"
-    return_content: yes
-    validate_certs: no
+    return_content: true
+    validate_certs: false
     status_code: 204
 
 - name: Get Admin Token with Longer Lifespan
-  uri:
-    url: https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/auth/realms/master/protocol/openid-connect/token
+  ansible.builtin.uri:
+    url: https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/realms/master/protocol/openid-connect/token
     method: POST
     body_format: form-urlencoded
     body:
@@ -134,12 +134,12 @@
   register: token_result
 
 - name: Extract Admin Token with Longer Lifespan from Keycloack from result
-  set_fact:
-    admin_token: '{{token_result.json.access_token}}'
+  ansible.builtin.set_fact:
+    admin_token: '{{ token_result.json.access_token }}'
 
 - name: Create Microcks users
-  uri:
-    url: 'https://microcks-keycloak-{{ microcks_project }}.{{route_subdomain}}/auth/admin/realms/microcks/users'
+  ansible.builtin.uri:
+    url: 'https://microcks-keycloak-{{ microcks_project }}.{{ route_subdomain }}/admin/realms/microcks/users'
     method: POST
     headers:
       Content-Type: "application/json"
@@ -153,5 +153,5 @@
           value: "{{ microcks_password }}"
           temporary: false
     body_format: json
-    validate_certs: no
+    validate_certs: false
     status_code: [201, 409]

@@ -1,5 +1,5 @@
-- name: Evaluate '{{ threescale_project }}' namespace
-  k8s:
+- name: Evaluate Namespace {{ threescale_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -9,7 +9,7 @@
     state: present
 
 - name: Evaluate 3scale Operator
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -17,7 +17,7 @@
     resource_definition: "{{ lookup('template', '3scale-operator.yml.j2') }}"
 
 - name: Wait 3scale Operator
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -36,11 +36,11 @@
   until: r_3scale_operator_pod.resources | list | length == 1
 
 - name: Install Minio
-  include_role:
+  ansible.builtin.include_role:
     name: minio
 
 - name: Evaluate 3scale Operator s3-secret
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -48,7 +48,7 @@
     resource_definition: "{{ lookup('template', 's3-secret.yml.j2') }}"
 
 - name: Evaluate 3scale APIManager
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -56,7 +56,7 @@
     resource_definition: "{{ lookup('template', '3scale-instance.yml.j2') }}"
 
 - name: Wait for 3scale pods to be ready
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -72,7 +72,7 @@
   delay: 30
 
 - name: Evaluate UAT Tenant Secret
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -80,7 +80,7 @@
     resource_definition: "{{ lookup('template', 'uat_admin_secret.yml.j2') }}"
 
 - name: Evaluate UAT Tenant
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false

@@ -1,5 +1,5 @@
-- name: Evaluate '{{ rhsso_project }}' namespace
-  k8s:
+- name: Evaluate namespace {{ rhsso_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -8,8 +8,8 @@
     name: '{{ rhsso_project }}'
     state: present
 
-- name: Evaluate '{{ rhsso_project }}' OperatorGroup
-  k8s:
+- name: Evaluate OperatorGroup {{ rhsso_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -21,10 +21,10 @@
         namespace: '{{ rhsso_project }}'
       spec:
         targetNamespaces:
-        - '{{ rhsso_project }}'
+          - '{{ rhsso_project }}'
 
 - name: Evaluate SSO Subscription
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
@@ -44,7 +44,7 @@
         startingCSV: rhsso-operator.7.5.1-opr-010
 
 - name: Wait for SSO operator to install
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -57,7 +57,7 @@
   delay: 30
 
 - name: Evaluate SSO Instance
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -74,7 +74,7 @@
         instances: 1
 
 - name: Wait for SSO to be running
-  uri:
+  ansible.builtin.uri:
     url: https://keycloak-{{ rhsso_project }}.{{ route_subdomain }}
     status_code: '200'
   register: result

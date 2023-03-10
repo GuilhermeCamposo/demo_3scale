@@ -1,5 +1,5 @@
 - name: Evaluate Prometheus Monitor
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -7,27 +7,45 @@
     namespace: '{{ threescale_project }}'
     resource_definition: "{{ lookup('template', 'prometheus_monitor.yml.j2') }}"
 
-- name: Get Grafana ServiceAccount
-  k8s_info:
+- name: Get a list of all Secret objects
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: '{{ verify_tls }}'
-    kind: ServiceAccount
-    name:  grafana-serviceaccount
+    validate_certs: false
+    api_version: v1
+    kind: Secret
+    namespace: '{{ threescale_project }}'
+  register: secrets_list
+
+- name: Iterate over list of secrets until the correct string is found
+  ansible.builtin.set_fact:
+    secret_name: "{{ item['metadata']['name'] }}"
+  loop: "{{ secrets_list.resources }}"
+  when: item['metadata']['name'] | regex_search('grafana-serviceaccount-token.')
+
+- name: Get Grafana ServiceAccount Token
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Secret
+    name: '{{ secret_name }}'
     namespace: '{{ threescale_project }}'
     api_version: v1
-  register: r_grafana_sa
+  register: r_grafana_secret
   until:
-    - r_grafana_sa.resources is defined
+    - r_grafana_secret.resources is defined
   retries: 10
   delay: 15
 
-- name: Loop Secrets
-  include_tasks: tasks/loop_secrets.yml
-  with_items: '{{ r_grafana_sa.resources[0].secrets  }}'
+- name: Set grafana_token
+  ansible.builtin.set_fact:
+    grafana_token: '{{ r_grafana_secret.resources[0].data.token | b64decode }}'
+  when:
+    - r_grafana_secret.resources[0].data.token is defined
 
 - name: Evaluate Grafana ServiceAccount permissons
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -42,12 +60,12 @@
         kind: ClusterRole
         name: cluster-monitoring-view
       subjects:
-      - kind: ServiceAccount
-        name: grafana-serviceaccount
-        namespace: '{{ threescale_project }}'
+        - kind: ServiceAccount
+          name: grafana-serviceaccount
+          namespace: '{{ threescale_project }}'
 
 - name: Evaluate Grafana Datasource
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'

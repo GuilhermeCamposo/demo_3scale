@@ -20,51 +20,52 @@
     microcks_password: 3scale
   tasks:
     - name: Check Required Parameters
-      fail: msg="This play requires 'server' and 'token' to be defined"
+      ansible.builtin.fail:
+        msg: "This play requires 'server' and 'token' to be defined"
       when:
         - (server is not defined) or (token is not defined) or (server is none) or (token is none)
-      ignore_errors: no
+      ignore_errors: false
 
     - name: Set domain
-      set_fact:
-        domain : "{{ server | regex_replace('https://api.') | regex_replace(':6443') }}"
+      ansible.builtin.set_fact:
+        domain: "{{ server | regex_replace('https://api.') | regex_replace(':6443') }}"
 
     - name: Set Subdomain
-      set_fact:
+      ansible.builtin.set_fact:
         route_subdomain: "apps.{{ domain }}"
 
-    - name: login as super user with token on OpenShift 4
-      command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
+    - name: Log in as super user with token on OpenShift 4
+      ansible.builtin.command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
       when:
-       - token is defined
-       - token is not none
-       - token|trim() != ""
-      ignore_errors: no
+        - token is defined
+        - token is not none
+        - token|trim() != ""
+      ignore_errors: false
 
     - name: Include RHSSO
-      include_role:
+      ansible.builtin.include_role:
         name: rhsso
 
     - name: Include Mailhog
-      include_role:
+      ansible.builtin.include_role:
         name: mailhog
 
     - name: Include Monitoring
-      include_role:
+      ansible.builtin.include_role:
         name: monitoring
-    
+
     - name: Include Microcks
-      include_role:
+      ansible.builtin.include_role:
         name: microcks
 
     - name: Include Apicurito
-      include_role:
+      ansible.builtin.include_role:
         name: apicurito
 
     - name: Include 3scale
-      include_role:
+      ansible.builtin.include_role:
         name: 3scale
 
     - name: Include Apps
-      include_role:
+      ansible.builtin.include_role:
         name: apps

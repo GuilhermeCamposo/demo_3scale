@@ -1,5 +1,5 @@
-- name: Evaluate {{ apicurito_project }} namespace
-  k8s:
+- name: Evaluate namespace {{ apicurito_project }}
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -9,7 +9,7 @@
     state: present
 
 - name: Evaluate Apicurito Operator Group
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -22,10 +22,10 @@
         name: '{{ apicurito_project }}-group'
       spec:
         targetNamespaces:
-        - '{{ apicurito_project }}'
+          - '{{ apicurito_project }}'
 
 - name: Evaluate Apicurito Subscription
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -33,7 +33,7 @@
     resource_definition: "{{ lookup('template', 'apicurito-subscription.yaml.j2') }}"
 
 - name: Wait for Apicurito operator to install
-  k8s_info:
+  kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
@@ -46,15 +46,15 @@
   delay: 30
 
 - name: Evaluate the Apicurito CR
-  k8s:
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
     state: present
-    resource_definition:  "{{ lookup('template', 'apicurito-resource.yaml.j2') }}"
+    resource_definition: "{{ lookup('template', 'apicurito-resource.yaml.j2') }}"
 
 - name: Wait for Apicurito to be running
-  uri:
+  ansible.builtin.uri:
     url: https://apicurito-ui-{{ apicurito_project }}.{{ route_subdomain }}
     status_code: '200'
   register: result

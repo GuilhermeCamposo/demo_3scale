@@ -1,11 +1,11 @@
-- name: Evaluate '{{ apps_project }}' namespace
-  k8s:
+- name: Evaluate namespace {{ apps_project }}
+  kubernetes.core.k8s:
     api_version: v1
     kind: Namespace
     name: '{{ apps_project }}'
     state: present
 
 - name: Evaluate backend-secret
-  k8s:
+  kubernetes.core.k8s:
     state: present
     resource_definition: "{{ lookup('template', 'backend-secret.yml.j2') }}"
