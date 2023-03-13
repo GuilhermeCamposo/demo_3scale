@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: api-pipeline
+  namespace: '{{ cicd_project }}'
+spec:
+  params:
+    - default: main
+      description: Select Branch
+      name: BRANCH_NAME
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: '{{ api_repository }}'
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+        - name: revision
+          value: $(params.BRANCH_NAME)
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+
+  workspaces:
+    - name: shared-workspace
+   

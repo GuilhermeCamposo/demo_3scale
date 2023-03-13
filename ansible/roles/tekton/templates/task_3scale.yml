@@ -1,0 +1,71 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: threescale-cli
+  namespace: '{{ cicd_project }}'
+spec:
+  description: Interact with 3scale API
+  params:
+
+    - description: Location of the repo where image has to be pushed
+      name: IMAGE
+      type: string
+
+    - default: .
+      description: Path to the directory to use as context.
+      name: CONTEXT
+      type: string
+  steps:
+    - command:
+        - buildah
+        - bud
+        - '--storage-driver=vfs'
+        - '--tls-verify=$(params.TLSVERIFY)'
+        - '--layers'
+        - '-t'
+        - $(params.IMAGE)
+        - '-f'
+        - $(params.DOCKERFILE)
+        - $(params.CONTEXT)
+      image: $(params.BUILDER_IMAGE)
+      name: build
+      resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      volumeMounts:
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+      workingDir: $(workspaces.source.path)
+    - command:
+        - buildah
+        - push
+        - '--storage-driver=vfs'
+        - '--tls-verify=$(params.TLSVERIFY)'
+        - '--digestfile=$(workspaces.source.path)/image-digest'
+        - '--authfile=/etc/secret-volume/.dockerconfigjson'
+        - $(params.IMAGE)
+        - 'docker://$(params.IMAGE)'
+      image: $(params.BUILDER_IMAGE)
+      name: push
+      resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      volumeMounts:
+        - mountPath: /etc/secret-volume
+          name: quay-secret
+        - mountPath: /var/lib/containers
+          name: varlibcontainers
+      workingDir: $(workspaces.source.path)
+    - image: $(params.BUILDER_IMAGE)
+      name: digest-to-results
+      resources: {}
+      script: >-
+        cat $(workspaces.source.path)/image-digest | tee /tekton/results/IMAGE_DIGEST
+  volumes:
+    - name: varlibcontainers
+      emptyDir: {}      
+  workspaces:
+    - mountPath: /workspace/source
+      name: source

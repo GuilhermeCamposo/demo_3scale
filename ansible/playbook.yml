@@ -1,6 +1,7 @@
 - hosts: localhost
   name: Install 3scale Demo
   vars:
+    delete_demo: false
     verify_tls: false
     insecure_skip_tls_verify: true
     minio_stateful: false
@@ -12,6 +13,8 @@
     mailhog_project: demo-tools
     apicurio_registry_project: demo-tools
     kafka_project: demo-tools
+    cicd_project: demo-cicd
+    camel_k_project: demo-apps
     # 3scale SSO
     threescale_client_id: threescale
     threescale_client_secret: d141e6ca-707a-4de9-a9c2-696d21890b37
@@ -20,6 +23,7 @@
     grafana_user: admin
     microcks_username: admin
     microcks_password: 3scale
+    enable_pipelines: true
   tasks:
     - name: Check Required Parameters
       ansible.builtin.fail:
@@ -44,38 +48,46 @@
         - token|trim() != ""
       ignore_errors: false
 
-    - name: Include RHSSO
-      ansible.builtin.include_role:
-        name: rhsso
+    # - name: Include RHSSO
+    #   ansible.builtin.include_role:
+    #     name: rhsso
 
-    - name: Include Mailhog
-      ansible.builtin.include_role:
-        name: mailhog
+    # - name: Include Mailhog
+    #   ansible.builtin.include_role:
+    #     name: mailhog
 
-    - name: Include Monitoring
-      ansible.builtin.include_role:
-        name: monitoring
+    # - name: Include Monitoring
+    #   ansible.builtin.include_role:
+    #     name: monitoring
 
-    - name: Include Microcks
-      ansible.builtin.include_role:
-        name: microcks
+    # - name: Include Microcks
+    #   ansible.builtin.include_role:
+    #     name: microcks
 
-    - name: Include Apicurito
-      ansible.builtin.include_role:
-        name: apicurito
+    # - name: Include Apicurito
+    #   ansible.builtin.include_role:
+    #     name: apicurito
 
-    - name: Include 3scale
-      ansible.builtin.include_role:
-        name: 3scale
+    # - name: Include 3scale
+    #   ansible.builtin.include_role:
+    #     name: 3scale
 
-    - name: Include Apps
-      ansible.builtin.include_role:
-        name: apps
+    # - name: Include Apps
+    #   ansible.builtin.include_role:
+    #     name: apps
 
-    - name: Include Streams
-      ansible.builtin.include_role:
-        name: streams
+    # - name: Include Streams
+    #   ansible.builtin.include_role:
+    #     name: streams
 
-    - name: Include Service Registry
+    # - name: Include Service Registry
+    #   ansible.builtin.include_role:
+    #     name: apicurio-registry
+
+    # - name: Include Camel K
+    #   ansible.builtin.include_role:
+    #     name: camel-k
+
+    - name: Include Tekton
       ansible.builtin.include_role:
-        name: apicurio-registry
+        name: tekton

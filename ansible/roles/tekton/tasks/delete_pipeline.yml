@@ -1,0 +1,33 @@
+- name: Delete Pipelines Subscription
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: absent
+    kind: Subscription
+    api_version: operators.coreos.com/v1alpha1
+    definition:
+      metadata:
+        name: openshift-pipelines-operator
+        namespace: openshift-operators
+      spec:
+        installPlanApproval: Automatic
+        channel: stable
+        name: openshift-pipelines-operator-rh
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+
+- name: Delete Project {{ cicd_project }}
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: absent
+    kind: Project
+    api_version: project.openshift.io/v1
+    definition:
+      metadata:
+        name: "{{ cicd_project }}"
+        annotations:
+          openshift.io/description: ""
+          openshift.io/display-name: "RHI Demo CICD Project"
