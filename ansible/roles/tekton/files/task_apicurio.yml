@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: apicurio-registry-download
+spec:
+  description: Download spec from Apicurio Registry  
+  params:
+    - name: HOST
+      description: file URL
+      type: string
+    - name: GROUP_ID
+      description: artifact's group id
+      type: string
+    - name: ARTIFACT_ID
+      description: artifact's id
+      type: string            
+    - name: FILE_NAME
+      description: File name
+      type: string             
+  steps:
+    - command:
+        - curl
+      args:   
+        - $(params.HOST)/apis/registry/v2/groups/$(params.GROUP_ID)/artifacts/$(params.ARTIFACT_ID)
+        - '-o' 
+        - $(params.FILE_NAME)
+      image: registry.access.redhat.com/ubi8:8.7
+      name: curl
+      resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      workingDir: $(workspaces.source.path)  
+  workspaces:
+    - mountPath: /workspace/source
+      name: source

@@ -1,0 +1,64 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: threescale-activedocs
+spec:
+  description: Update ActiveDocs
+  params:
+    - name: THREESCALE_URL
+      description: Location of the repo where image has to be pushed
+      type: string
+
+    - name: THREESCALE_TOKEN
+      description: Token with permission to manipulate activedocs
+      type: string
+
+    - name: ACTIVEDOCS_NAME
+      description: Name of the Activedoc to be created
+      type: string
+
+    - name: SPEC_PATH
+      description: Path in the shared workspace to the openapi specification file
+      type: string          
+  steps:
+    - command:
+        - 3scale 
+      args:  
+        - remote 
+        - add 
+        - server 
+        - https://$(params.THREESCALE_TOKEN)@$(params.THREESCALE_URL) 
+      image: registry.redhat.io/3scale-amp2/toolbox-rhel8:3scale2.13.0
+      name: login
+      resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      volumeMounts:
+        - mountPath: /opt/app-root/src/
+          name: threescale-session    
+      workingDir: $(workspaces.source.path)
+    - command:
+        - 3scale
+      args:   
+        - activedocs 
+        - create 
+        - server 
+        - $(params.ACTIVEDOCS_NAME) 
+        - $(params.SPEC_PATH) 
+      image: registry.redhat.io/3scale-amp2/toolbox-rhel8:3scale2.13.0
+      name: create-doc
+      resources: {}
+      securityContext:
+        capabilities:
+          add: ["SETFCAP"]
+      volumeMounts:
+        - mountPath: /opt/app-root/src/
+          name: threescale-session    
+      workingDir: $(workspaces.source.path)
+  volumes:
+    - name: threescale-session
+      emptyDir: {}              
+  workspaces:
+    - mountPath: /workspace/source
+      name: source
