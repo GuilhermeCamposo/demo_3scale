@@ -9,3 +9,12 @@
   kubernetes.core.k8s:
     state: present
     resource_definition: "{{ lookup('template', 'backend-secret.yml.j2') }}"
+
+- name: Deploy Backend App
+  kubernetes.core.k8s:
+    state: present
+    namespace: '{{ apps_project }}'
+    resource_definition: "{{ lookup('file', item) }}"
+  loop: 
+    - database-backend-dc.yml
+    - database-backend-svc.yml 

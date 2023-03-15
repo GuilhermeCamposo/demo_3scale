@@ -20,27 +20,11 @@ This repository demonstrates how to use many of 3scale's features.
 | server    | https://api.mycluster.domain.com:6443              | OpenShift cluster API URL
 |=======================
 
-
 ===  How to run the playbook
 
-    ansible-playbook -e token=${token} -e server=${server} playbook.yml
-
-
-=== Deploy the applications
-
-Once the playbook is done, you may deploy the sample applications:
-
-.1 Go to the correct project
-  oc project demo-apps
-
-.2 deploy the backend app
-  cd apps/database-backend
-  mvn clean package -Dquarkus.kubernetes.deploy=true
-
-.3 deploy the frontend API app
-  cd ../api-frontend
-  mvn clean package -Dquarkus.kubernetes.deploy=true
-
+----
+ansible-playbook -e token=${token} -e server=${server} playbook.yml
+----
 
 === Manual steps
 
@@ -83,35 +67,44 @@ image::docs/imgs/select-api.PNG[Select API]
 
 export `UAT_TOKEN`, `PROD_TOKEN` and `DOMAIN` as environment variables, then run the following command.
 
-    3scale remote add -k uat https://${UAT_TOKEN}@uat-admin.apps.${DOMAIN}
-    3scale remote add -k prod https://${PROD_TOKEN}@prod-admin.apps.${DOMAIN}
+----
+3scale remote add -k uat https://${UAT_TOKEN}@uat-admin.apps.${DOMAIN}
+3scale remote add -k prod https://${PROD_TOKEN}@prod-admin.apps.${DOMAIN}
+----
 
 === Copy Database API Backend and Product
 
-    3scale backend copy -k -s prod -d uat database-backend
-    3scale product copy -k -s prod -d uat database-api
+----
+3scale backend copy -k -s prod -d uat database-backend
+3scale product copy -k -s prod -d uat database-api
+----
 
 === Copy Database API Application Plan
 
-    3scale application-plan export prod database-api basic -k > basic-plan.yml
-    3scale application-plan import uat -f basic-plan.yml database-api -k
+----
+3scale application-plan export prod database-api basic -k > basic-plan.yml
+3scale application-plan import uat -f basic-plan.yml database-api -k
+----
 
 === Create an Application for the new Environment
 
 Find an account:
 
-    3scale account find uat admin+test@example.com -a -k
+----
+3scale account find uat admin+test@example.com -a -k
+----
 
 Create the application with the account information:
 
-    3scale application create -k uat ${ACCOUNT_ID} ${SERVICE_ID} basic 'Test App' --application-id=${APP_ID} --application-key=${USER_KEY} --redirect-url=' ' --description='some description'
-
+----
+3scale application create -k uat ${ACCOUNT_ID} ${SERVICE_ID} basic 'Test App' --application-id=${APP_ID} --application-key=${USER_KEY} --redirect-url=' ' --description='some description'
+----
 
 == Customizing Resources Already Created
 
 you may use 3scale-cms to update content you have in your developer portal. Here is how.
 
-=== Running the container image with Podman
+=== Running the Container Image with Podman
 
 You may install `cms` or use a container image to run it. In my example I'm using the container image to map a local directory.
 

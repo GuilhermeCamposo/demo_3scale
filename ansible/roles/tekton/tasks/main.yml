@@ -12,6 +12,6 @@
 
 - name: Delete Pipeline
   ansible.builtin.include_tasks: delete_pipeline.yml
-  when: 
+  when:
     - delete_demo | bool
     - enable_pipelines

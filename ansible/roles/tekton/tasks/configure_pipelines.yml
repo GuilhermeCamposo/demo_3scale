@@ -56,6 +56,26 @@
     - task_3scale.yml
     - task_apicurio.yml
 
+- name: Get 3scale system-seed secret
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Secret
+    name: system-seed
+    namespace: '{{ threescale_project }}'
+    api_version: v1
+  register: r_system_seed
+  until:
+    - r_system_seed.resources is defined
+    - r_system_seed.resources[0] is defined
+  retries: 10
+  delay: 15
+
+- name: Set 3scale admin token
+  ansible.builtin.set_fact:
+    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'    
+
 - name: Evaluate Pipeline
   retries: 5
   delay: 10
@@ -68,4 +88,4 @@
     validate_certs: false
     state: present
     resource_definition: "{{ lookup('template', 'pipeline.yml.j2') }}"
-
+    

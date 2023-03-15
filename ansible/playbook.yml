@@ -48,33 +48,33 @@
         - token|trim() != ""
       ignore_errors: false
 
-    - name: Include RHSSO
-      ansible.builtin.include_role:
-        name: rhsso
+    # - name: Include RHSSO
+    #   ansible.builtin.include_role:
+    #     name: rhsso
 
-    - name: Include Mailhog
-      ansible.builtin.include_role:
-        name: mailhog
+    # - name: Include Mailhog
+    #   ansible.builtin.include_role:
+    #     name: mailhog
 
-    - name: Include Monitoring
-      ansible.builtin.include_role:
-        name: monitoring
+    # - name: Include Monitoring
+    #   ansible.builtin.include_role:
+    #     name: monitoring
 
-    - name: Include Microcks
-      ansible.builtin.include_role:
-        name: microcks
+    # - name: Include Microcks
+    #   ansible.builtin.include_role:
+    #     name: microcks
 
-    - name: Include Apicurito
-      ansible.builtin.include_role:
-        name: apicurito
+    # - name: Include Apicurito
+    #   ansible.builtin.include_role:
+    #     name: apicurito
 
-    - name: Include 3scale
-      ansible.builtin.include_role:
-        name: 3scale
+    # - name: Include 3scale
+    #   ansible.builtin.include_role:
+    #     name: 3scale
 
-    - name: Include Apps
-      ansible.builtin.include_role:
-        name: apps
+    # - name: Include Apps
+    #   ansible.builtin.include_role:
+    #     name: apps
 
     - name: Include Streams
       ansible.builtin.include_role:

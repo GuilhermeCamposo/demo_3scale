@@ -7,7 +7,7 @@ spec:
   params:
     - name: HOST
       default: http://registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}
-      description: file URL
+      description: Apicurio Registry URL
       type: string
 
     - name: GROUP_ID
@@ -31,7 +31,7 @@ spec:
       type: string
 
     - name: THREESCALE_TOKEN
-      default: 570bcbc00bcc6c058b2c7bb1211fb88e
+      default: {{ threescale_token }}
       description: Token with permission to manipulate activedocs
       type: string
 

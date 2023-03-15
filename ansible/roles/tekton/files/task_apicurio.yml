@@ -6,7 +6,7 @@ spec:
   description: Download spec from Apicurio Registry  
   params:
     - name: HOST
-      description: file URL
+      description: Apicurio Registry URL
       type: string
     - name: GROUP_ID
       description: artifact's group id
