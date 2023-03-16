@@ -1,9 +1,9 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: threescale-activedocs
+  name: threescale-activedocs-apply
 spec:
-  description: Create ActiveDocs
+  description: Update ActiveDocs
   params:
     - name: THREESCALE_URL
       description: Location of the repo where image has to be pushed
@@ -42,10 +42,10 @@ spec:
         - 3scale
       args:   
         - activedocs 
-        - create 
-        - server 
-        - $(params.ACTIVEDOCS_NAME) 
-        - $(params.SPEC_PATH) 
+        - apply 
+        - server
+        - --openapi-spec=$(params.SPEC_PATH)  
+        - $(params.ACTIVEDOCS_NAME)
       image: registry.redhat.io/3scale-amp2/toolbox-rhel8:3scale2.13.0
       name: create-doc
       resources: {}

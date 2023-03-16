@@ -53,7 +53,7 @@
     namespace: '{{ cicd_project }}'
     resource_definition: "{{ lookup('file', item) }}"
   loop:
-    - task_3scale.yml
+    - task_3scale_apply.yml
     - task_apicurio.yml
 
 - name: Get 3scale system-seed secret
@@ -87,4 +87,6 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    resource_definition: "{{ lookup('template', 'pipeline.yml.j2') }}"
+    resource_definition: "{{ lookup('template', item) }}"
+  loop:
+    - pipeline_update.yml.j2

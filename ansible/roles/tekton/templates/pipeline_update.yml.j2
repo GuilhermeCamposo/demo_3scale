@@ -1,0 +1,95 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: api-update-pipeline
+  namespace: '{{ cicd_project }}'
+spec:
+  params:
+    - name: HOST
+      default: http://registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}
+      description: Apicurio Registry URL
+      type: string
+
+    - name: GROUP_ID
+      default: my-groupid
+      description: artifact's group id
+      type: string
+
+    - name: ARTIFACT_ID
+      default: camel-k-api
+      description: artifact's id
+      type: string
+
+    - name: FILE_NAME
+      default: openapi.json
+      description: File name
+      type: string
+
+    - name: THREESCALE_URL
+      description: Location of the repo where image has to be pushed
+      default: prod-admin.{{ route_subdomain }}
+      type: string
+
+    - name: THREESCALE_TOKEN
+      default: {{ threescale_token }}
+      description: Token with permission to manipulate activedocs
+      type: string
+
+    - name: NAMESPACE
+      default: {{ camel_k_project }}
+      description: Namespace to deploy the configmap
+      type: string        
+  tasks:
+    - name: download-openapi
+      params:
+        - name: HOST
+          value: $(params.HOST)
+        - name: GROUP_ID
+          value: $(params.GROUP_ID)
+        - name: ARTIFACT_ID
+          value: $(params.ARTIFACT_ID)
+        - name: FILE_NAME
+          value: $(params.FILE_NAME)
+      taskRef:
+        kind: Task
+        name: apicurio-registry-download
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+   
+    - name: publish-to-3scale
+      params:
+        - name: SPEC_PATH
+          value: $(params.FILE_NAME)
+        - name: ACTIVEDOCS_NAME
+          value: $(params.ARTIFACT_ID)
+        - name: THREESCALE_TOKEN
+          value: $(params.THREESCALE_TOKEN)
+        - name: THREESCALE_URL
+          value: $(params.THREESCALE_URL)
+      runAfter:
+        - download-openapi
+      taskRef:
+        kind: Task
+        name: threescale-activedocs-apply
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: update-configmap
+      params:
+        - name: SCRIPT
+          value: |
+           oc delete cm $(params.ARTIFACT_ID) -n $(params.NAMESPACE)
+           oc create cm $(params.ARTIFACT_ID) --from-file=$(params.FILE_NAME) -n $(params.NAMESPACE)
+      runAfter:
+        - publish-to-3scale
+      taskRef:
+        kind: ClusterTask
+        name: openshift-client
+      workspaces:
+        - name: manifest-dir
+          workspace: shared-workspace         
+  workspaces:
+    - name: shared-workspace
+   
