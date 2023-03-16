@@ -74,7 +74,7 @@
 
 - name: Set 3scale admin token
   ansible.builtin.set_fact:
-    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'    
+    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
 
 - name: Evaluate Pipeline
   retries: 5
@@ -88,4 +88,3 @@
     validate_certs: false
     state: present
     resource_definition: "{{ lookup('template', 'pipeline.yml.j2') }}"
-    
