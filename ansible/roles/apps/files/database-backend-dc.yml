@@ -31,20 +31,12 @@ spec:
       namespace: demo-apps
     spec:
       containers:
-      - command:
-        - java
-        - -Dquarkus.http.host=0.0.0.0
-        - -Djava.util.logging.manager=org.jboss.logmanager.LogManager
-        - -jar
-        - /deployments/quarkus-run.jar
-        env:
+      - env:
         - name: KUBERNETES_NAMESPACE
           valueFrom:
             fieldRef:
               apiVersion: v1
               fieldPath: metadata.namespace
-        - name: JAVA_APP_JAR
-          value: /deployments/quarkus-run.jar
         image: quay.io/gcamposo/demo-3scale-database-backend:1.0.0-SNAPSHOT
         imagePullPolicy: Always
         name: database-backend

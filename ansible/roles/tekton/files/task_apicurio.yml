@@ -21,6 +21,7 @@ spec:
     - command:
         - curl
       args:   
+        - '-v'
         - $(params.HOST)/apis/registry/v2/groups/$(params.GROUP_ID)/artifacts/$(params.ARTIFACT_ID)
         - '-o' 
         - $(params.FILE_NAME)
