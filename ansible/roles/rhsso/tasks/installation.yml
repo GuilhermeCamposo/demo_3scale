@@ -41,7 +41,6 @@
         name: rhsso-operator
         source: redhat-operators
         sourceNamespace: openshift-marketplace
-        startingCSV: rhsso-operator.7.5.1-opr-010
 
 - name: Wait for SSO operator to install
   kubernetes.core.k8s_info:

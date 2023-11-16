@@ -60,9 +60,9 @@
       ansible.builtin.include_role:
         name: monitoring
 
-    - name: Include Microcks
-      ansible.builtin.include_role:
-        name: microcks
+    # - name: Include Microcks
+    #   ansible.builtin.include_role:
+    #     name: microcks
 
     - name: Include Apicurito
       ansible.builtin.include_role:
