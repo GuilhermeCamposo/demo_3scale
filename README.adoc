@@ -2,10 +2,10 @@
 
 This repository demonstrates how to use many of 3scale's features.
 
-== Environment
+== Demo Last Tested with
 
-- OCP 4.10
-- oc client >= 4.10
+- OCP 4.13
+- oc client >= 4.13
 - 3scale 2.13
 
 
@@ -28,7 +28,7 @@ ansible-playbook -e token=${token} -e server=${server} playbook.yml
 
 === Manual steps
 
-Some steps need to be done using 3scale's console.
+After the installation there are some steps that need to be done using 3scale's console.
 
 ==== Enable portal
 
@@ -61,7 +61,7 @@ Select API
 
 image::docs/imgs/select-api.PNG[Select API]
 
-== Using 3scale CLI
+== Using the 3scale CLI
 
 === Connect to tenants
 
@@ -100,7 +100,7 @@ Create the application with the account information:
 3scale application create -k uat ${ACCOUNT_ID} ${SERVICE_ID} basic 'Test App' --application-id=${APP_ID} --application-key=${USER_KEY} --redirect-url=' ' --description='some description'
 ----
 
-== Customizing Resources Already Created
+== Customizing Developer Portal with CMS tool
 
 you may use 3scale-cms to update content you have in your developer portal. Here is how.
 
@@ -139,3 +139,27 @@ cms $THREESCALE_KEY $THREESCALE_URL upload
 - 3scale-cms does not handle metadata relate to the file, like MIME type, layout and so on. Or you create the file first using 3scale console or you add that information in the console later.
 - new files are not automatically published. You will need to do that in the console later.
 ====
+
+== How to present this demo?
+
+this demo has many different features that can me demonstrated for different purpouse. I will document here some things you may need to know.
+
+=== How to log in 3scale's console and SSO?
+
+both are using self-generated crendentials. 
+
+. Look for the `system-seed` secret for the 3scale's credentials in the `demo-3scale` project
+. Loof for the `credential-example-keycloak` for SSO's crendentials in the `demo-rhsso` project
+
+=== How to use the Postman collection?
+
+the Postman collection has 3 requests:
+
+. Request SSO token
+. GET Database API
+. POST Database API
+
+before starting using it, update the `cluster_domain` variable to reflect your OpenShift enviroment.
+
+To be able to get an valid token from SSO, you need to update the *Request SSO Token* headers with the credentials generated for the application.
+Go to SSO console and retrieve the `client_id` and `client_secret` from the latest created client.

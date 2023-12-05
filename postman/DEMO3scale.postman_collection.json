@@ -1,0 +1,151 @@
+{
+	"info": {
+		"_postman_id": "6f8eb3e1-4307-48d8-9f37-71b75e56c3fc",
+		"name": "DEMO 3scale",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "720292"
+	},
+	"item": [
+		{
+			"name": "SSO Request Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://keycloak-demo-rhsso.apps.{{cluster_domain}}/auth/realms/threescale-apps/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"keycloak-demo-rhsso",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"threescale-apps",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Database API List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://database-api-prod-apicast-staging.apps.{{cluster_domain}}/backend",
+					"protocol": "https",
+					"host": [
+						"database-api-prod-apicast-staging",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Database API Save",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"test\", \"email\": \"test@gmail.com\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://database-api-prod-apicast-staging.apps.{{cluster_domain}}/backend",
+					"protocol": "https",
+					"host": [
+						"database-api-prod-apicast-staging",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "cluster_domain",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

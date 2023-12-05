@@ -5,5 +5,5 @@ metadata:
 spec:
   configuration:
     kafkasql:
-      bootstrapServers: 'cluster-kafka-bootstrap.{{ kafka_project }}.svc:9092'
+      bootstrapServers: 'cluster-kafka-bootstrap.{{ kafka_project }}.svc.cluster.local:9092'
     persistence: kafkasql
