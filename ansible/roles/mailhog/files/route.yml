@@ -13,4 +13,6 @@ spec:
     kind: Service
     name: mailhog
     weight: 100
+  tls:
+    termination: edge
   wildcardPolicy: None

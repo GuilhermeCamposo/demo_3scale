@@ -163,3 +163,19 @@ before starting using it, update the `cluster_domain` variable to reflect your O
 
 To be able to get an valid token from SSO, you need to update the *Request SSO Token* headers with the credentials generated for the application.
 Go to SSO console and retrieve the `client_id` and `client_secret` from the latest created client.
+
+=== How to present SMTP configuration?
+
+SMTP configuiration is required for 3scale's notification system to be able to send emails.
+For this demo we can mock one using Mailhog[https://github.com/mailhog/MailHog]. To access it just hit the URL:
+
+----
+URL=$(oc get route mailhog -n demo-tools -o jsonpath='{.spec.host}')
+echo https://$URL
+----
+
+=== How to present 3scale and Registry integration with Tekton?
+
+This demo comes with a pipeline that downloads an Open API spec from Registry, publish it in 3scale and creates a configmap for an application to consume.
+To demonstrate that feature you need an application like the one here[https://github.com/GuilhermeCamposo/demo_camel_k/tree/main].
+You will need to configure that API on 3scale.
