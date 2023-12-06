@@ -84,10 +84,6 @@
       ansible.builtin.include_role:
         name: apicurio-registry
 
-    - name: Include Camel K
-      ansible.builtin.include_role:
-        name: camel-k
-
     - name: Include Tekton
       ansible.builtin.include_role:
         name: tekton

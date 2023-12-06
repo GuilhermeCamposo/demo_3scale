@@ -177,5 +177,6 @@ echo https://$URL
 === How to present 3scale and Registry integration with Tekton?
 
 This demo comes with a pipeline that downloads an Open API spec from Registry, publish it in 3scale and creates a configmap for an application to consume.
+You can find it in the `demo-cicd` project.
 To demonstrate that feature you need an application like the one here[https://github.com/GuilhermeCamposo/demo_camel_k/tree/main].
 You will need to configure that API on 3scale.
