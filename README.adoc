@@ -180,3 +180,72 @@ This demo comes with a pipeline that downloads an Open API spec from Registry, p
 You can find it in the `demo-cicd` project.
 To demonstrate that feature you need an application like the one https://github.com/GuilhermeCamposo/demo_camel_k/tree/main[here].
 You will need to configure that API on 3scale.
+
+
+== Dec Demo notes:
+
+. 3scale ERD
++
+image::docs/imgs/3scale-entities-relations.png[]
+
+. component architecture:
++
+image::docs/imgs/oidc_apis.png[]
+
+. env variables
++
+-----
+ $ export OIDC_PROVIDER_HOSTNAME=<hostname of RHBK>
+ $ export OIDC_TOKEN_URL=https://$OIDC_PROVIDER_HOSTNAME/auth/realms/threescale-apps/protocol/openid-connect/token
+ $ export API_SSO_CLIENT_ID=<3scale app id>
+ $ export API_SSO_CLIENT_CRED=<3scale app secret>
+ $ export API_GW_HOSTNAME=<hostname of 3scale APIcast gw>
+ $ export API_GW_URL=https://$API_GW_HOSTNAME/backend
+-----
+
+. Retrieve tokens and parse for _access_token_ :
++
+-----
+$ TKN=$(curl -X POST "$OIDC_TOKEN_URL" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "grant_type=client_credentials" \
+            -d "client_id=$API_SSO_CLIENT_ID" \
+            -d "client_secret=$API_SSO_CLIENT_CRED" \
+            -d "scope=openid" \
+            | sed 's/.*access_token":"//g' | sed 's/".*//g')
+-----
+
+. Inspect token:
++
+-----
+$ jq -R 'split(".") | .[] | @base64d | fromjson' <<< $TKN | jq .
+-----
+
+. Populate _backend_ service with an _Attendee_ resource (in json representation):
++
+-----
+$ curl -v \
+    -H "Authorization: Bearer $TKN" \
+    -H "Content-Type: application/json" \
+    -X POST $API_GW_URL \
+    -d '{"name": "test", "email": "test@gmail.com" }'
+-----
+
+. Retreive list of _Attendee_ resources:
++
+-----
+$ curl -v \
+    -H "Authorization: Bearer $TKN" \
+    -X GET $API_GW_URL
+-----
+
+
+. 3scale automation examples:
+
+.. https://github.com/GuilhermeCamposo/demo_3scale/tree/main/ansible
++
+Installation of base components:  3scale, apicurio-registry, microcks, minio RH-SSO, AMQ Streams and Tekton
+
+.. https://github.com/redhat-na-ssa/fhir-server-api-management/tree/main/ansible
++
+Management of kube-native 3scale operator resources:  tenant, product application_plan, account, etc
