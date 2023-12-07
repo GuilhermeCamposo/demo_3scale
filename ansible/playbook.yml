@@ -21,8 +21,8 @@
     enable_user_workload_monitoring: true
     grafana_password: 3scale
     grafana_user: admin
-    microcks_username: admin
-    microcks_password: 3scale
+    microcks_username: microckstester
+    microcks_password: microckstester
     enable_pipelines: true
   tasks:
     - name: Check Required Parameters
@@ -39,14 +39,6 @@
     - name: Set Subdomain
       ansible.builtin.set_fact:
         route_subdomain: "apps.{{ domain }}"
-
-    - name: Log in as super user with token on OpenShift 4
-      ansible.builtin.command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
-      when:
-        - token is defined
-        - token is not none
-        - token|trim() != ""
-      ignore_errors: false
 
     - name: Include RHSSO
       ansible.builtin.include_role:
