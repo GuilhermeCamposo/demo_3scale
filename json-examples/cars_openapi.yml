@@ -1,0 +1,96 @@
+---
+openapi: 3.0.0
+info:
+  title: Cars Test
+  description: This is a generic API definition for manipulation of car resources. It contains basic CRUD operations for car resources.
+  version: 0.1
+paths:
+  /car:
+    get:
+      summary: Retrieve car resources.
+      description: Retrieve a bunch of car resources. Specify example resource as body payload.
+      operationId:
+      responses:
+        200:
+          description: Get an array of car resources.
+    post:
+      summary: Create new car resource.
+      description: Create a new car resource. Specify payload within request body.
+      operationId:
+      requestBody:
+        description: The payload of resource car to create.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schema/carType'
+      responses:
+        201:
+          description: Get the newly created car resource.
+  /car/{id}:
+    get:
+      summary: Retrieve a car resource.
+      description: Retrieve an already existing car resource having the specified id.
+      operationId:
+      responses:
+        200:
+          description: car resource having specified id.
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schema/carType'
+    put:
+      summary: Update a car resource.
+      description: Update an already existing car resource having the specified id.
+      operationId:
+      requestBody:
+        description: The payload of resource car to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schema/carType'
+      responses:
+        200:
+          description:
+          content:
+            application/json:
+              schema:
+    delete:
+      summary: Delete a car resource.
+      description: Remove an existing car resource having the specified id.
+      operationId:
+      responses:
+        204:
+          description: Resource car with specified id has been removed.
+    parameters:
+      - name: id
+        in: path
+        description: Id of resource
+        required: true
+        schema:
+          type: string
+components:
+  schemas:
+    carType:
+      type: object
+      properties:
+        Name:
+          type: string
+        Miles_per_Gallon:
+          type: number
+        Cylinders:
+          type: number
+        Displacement:
+          type: number
+        Horsepower:
+          type: number
+        Weight_in_lbs:
+          type: number
+        Acceleration:
+          type: number
+        Year:
+          type: string
+        Origin:
+          type: string
+        id:
+          type: string
+      
