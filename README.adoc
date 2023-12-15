@@ -40,23 +40,19 @@ add a name for the provider here: https://${3scale-admin-portal}/p/admin/account
 
 === Update Developer Portal website
 
-In the `dev_portal` folder you will find an automation to update the Developer Portal in a specific environment. Run the playbook the same way you run the installation playbook
-There are two new *pages* in there, `doc.css` and `doc.js`, when creating those pages, remember:
-
-. set the right mime-type in the advanced options
-. set the right path for them: css and javascript
+In the `dev_portal` folder you will find an automation to update the Developer Portal in a specific environment. Run the playbook in the same way you run the installation playbook.
 
 ==== Modifications
 
-. Multiple plans
+* Multiple plans
 
 image::docs/imgs/pick-plans.PNG[Multiple plans selection]
 
-. Search docs
+* Search docs
 
 image::docs/imgs/search-doc.PNG[Search DOC]
 
-. Select API
+* Select API
 
 image::docs/imgs/select-api.PNG[Select API]
 
@@ -141,7 +137,7 @@ To demonstrate that feature you need an application like the one https://github.
 You will need to configure that API on 3scale.
 
 
-== Dec Demo notes:
+== Demo notes:
 
 . 3scale ERD
 +
