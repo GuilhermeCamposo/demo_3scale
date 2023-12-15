@@ -1,0 +1,126 @@
+- hosts: localhost
+  name: Update Developer Portal
+  vars:
+    delete_demo: false
+    verify_tls: false
+    insecure_skip_tls_verify: true
+    minio_stateful: false
+    threescale_project: demo-3scale
+  tasks:
+    - name: Check Required Parameters
+      ansible.builtin.fail:
+        msg: "This play requires 'server' and 'token' to be defined"
+      when:
+        - (server is not defined) or (token is not defined) or (server is none) or (token is none)
+      ignore_errors: false
+
+    - name: Set domain
+      ansible.builtin.set_fact:
+        domain: "{{ server | regex_replace('https://api.') | regex_replace(':6443') }}"
+
+    - name: Set Subdomain
+      ansible.builtin.set_fact:
+        route_subdomain: "apps.{{ domain }}"
+
+    - name: Get system-seed secret
+      kubernetes.core.k8s_info:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        kind: Secret
+        name: system-seed
+        namespace: '{{ threescale_project }}'
+        api_version: v1
+      register: r_system_seed
+      until:
+        - r_system_seed.resources is defined
+        - r_system_seed.resources[0] is defined
+      retries: 10
+      delay: 15
+
+    - name: Set admin token
+      ansible.builtin.set_fact:
+        threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
+
+    - name: Update Templates
+      ansible.builtin.uri:
+        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item.id }}.json
+        validate_certs: false
+        method: PUT
+        body:
+          access_token: '{{ threescale_token }}'
+          draft: '{{ item.draft }}'
+        body_format: form-urlencoded
+        status_code: 200,201,204
+      register: r_application_plan
+      loop:
+        - { id: 9, draft: "{{ lookup('file', 'homepage.html') }}" }
+        - { id: 10, draft: "{{ lookup('file', 'documentation.html') }}" }
+        - { id: 7, draft: "{{ lookup('file', 'main-layout.html') }}" }
+        - { id: 6, draft: "{{ lookup('file', 'index.html') }}" }
+
+    - name: Create Javascript
+      ansible.builtin.uri:
+        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates.json
+        validate_certs: false
+        method: POST
+        body:
+          access_token: '{{ threescale_token }}'
+          draft: '{{ draft }}'
+          section_id: 6
+          path: "/javascripts/doc.js"
+          content_type: "text/javascript"
+          title: "doc.js"
+          type: "page"
+          system_name: "doc-js"
+        body_format: form-urlencoded
+        status_code: 200,201,204
+      register: r_doc_create
+      vars:
+        draft: "{{ lookup('file', 'doc.js') }}"
+
+    - name: Set ID
+      ansible.builtin.set_fact:
+        id_doc_js: '{{ r_doc_create.json.id }}'
+
+    - name: Create CSS
+      ansible.builtin.uri:
+        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates.json
+        validate_certs: false
+        method: POST
+        body:
+          access_token: '{{ threescale_token }}'
+          draft: '{{ draft }}'
+          section_id: 7
+          path: "/css/doc.css"
+          content_type: "text/css"
+          title: "doc.css"
+          type: "page"
+          system_name: "doc-css"
+        body_format: form-urlencoded
+        status_code: 200,201,204
+      register: r_doc_create
+      vars:
+        draft: "{{ lookup('file', 'doc.css') }}"
+
+    - name: Set ID
+      ansible.builtin.set_fact:
+        id_doc_css: '{{ r_doc_create.json.id }}'
+
+    - name: Publish Drafts
+      ansible.builtin.uri:
+        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item }}/publish.json
+        validate_certs: false
+        method: PUT
+        body:
+          access_token: '{{ threescale_token }}'
+        body_format: form-urlencoded
+        status_code: 200,201,204
+      register: r_application_plan
+      loop:
+        - 9
+        - 10
+        - 7
+        - 6
+        - "{{ id_doc_css }}"
+        - "{{ id_doc_js }}"

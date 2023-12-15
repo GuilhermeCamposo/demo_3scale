@@ -6,7 +6,7 @@ This repository demonstrates how to use many of 3scale's features.
 
 - OCP 4.13
 - oc client >= 4.13
-- 3scale 2.13
+- 3scale 2.14
 
 
 == 3scale Installation
@@ -26,38 +26,37 @@ This repository demonstrates how to use many of 3scale's features.
 ansible-playbook -e token=${token} -e server=${server} playbook.yml
 ----
 
-=== Manual steps
+== Manual steps
 
 After the installation there are some steps that need to be done using 3scale's console.
 
-==== Enable portal
+=== Enable portal
 
 Remove code on: https://${3scale-admin-portal}/site/dns
 
-==== Update Provider Name
+=== Update Provider Name
 
 add a name for the provider here: https://${3scale-admin-portal}/p/admin/account/edit
 
-==== Update Developer Portal website
+=== Update Developer Portal website
 
-In the `portal` folder you will find customization for the Developer Portal. Replace those files content using 3scale CMS tool.
-
+In the `dev_portal` folder you will find an automation to update the Developer Portal in a specific environment. Run the playbook the same way you run the installation playbook
 There are two new *pages* in there, `doc.css` and `doc.js`, when creating those pages, remember:
 
 . set the right mime-type in the advanced options
 . set the right path for them: css and javascript
 
-modifications:
+==== Modifications
 
-Multiple plans
+. Multiple plans
 
 image::docs/imgs/pick-plans.PNG[Multiple plans selection]
 
-Search docs
+. Search docs
 
 image::docs/imgs/search-doc.PNG[Search DOC]
 
-Select API
+. Select API
 
 image::docs/imgs/select-api.PNG[Select API]
 
@@ -100,46 +99,6 @@ Create the application with the account information:
 3scale application create -k uat ${ACCOUNT_ID} ${SERVICE_ID} basic 'Test App' --application-id=${APP_ID} --application-key=${USER_KEY} --redirect-url=' ' --description='some description'
 ----
 
-== Customizing Developer Portal with CMS tool
-
-you may use 3scale-cms to update content you have in your developer portal. Here is how.
-
-=== Running the Container Image with Podman
-
-You may install `cms` or use a container image to run it. In my example I'm using the container image to map a local directory.
-
-----
-podman run -it -v /local/dev-portal:/tmp/dev-portal:Z quay.io/gcamposo/3scale-cms:1.0.0 /bin/bash
-----
-
-=== Using 3scale-cms
-
-In order to interact with https://github.com/hguerrero/3scale-cms[3scale-cms], we need some information about the provider exported as environment variables.
-
-[options="header"]
-|=======================
-| Parameter            | Example Value                                      | Definition
-| THREESCALE_KEY       | 76336020ad982fbefd9189e1202b2818                   | 3scale Provider Key. Can be find on: https://3scale-admin.apps.domain.com/p/admin/account
-| THREESCALE_URL       | https://3scale-admin.apps.domain.com               | Your 3scale server URL.
-|=======================
-
-Once you have the container running, you may use `cms` like this:
-
-----
-THREESCALE_KEY=
-THREESCALE_URL=
-
-cd /tmp/dev-portal
-cms $THREESCALE_KEY $THREESCALE_URL upload
-----
-
-[NOTE]
-====
-- 3scale-cms uses the modification timestamp to diff files. So it is necessary to touch files that were created before the 3scale instance.
-- 3scale-cms does not handle metadata relate to the file, like MIME type, layout and so on. Or you create the file first using 3scale console or you add that information in the console later.
-- new files are not automatically published. You will need to do that in the console later.
-====
-
 == How to present this demo?
 
 this demo has many different features that can me demonstrated for different purpouse. I will document here some things you may need to know.
@@ -149,7 +108,7 @@ this demo has many different features that can me demonstrated for different pur
 both are using self-generated crendentials. 
 
 . Look for the `system-seed` secret for the 3scale's credentials in the `demo-3scale` project
-. Loof for the `credential-example-keycloak` for SSO's crendentials in the `demo-rhsso` project
+. Look for the `credential-example-keycloak` for SSO's crendentials in the `demo-rhsso` project
 
 === How to use the Postman collection?
 
@@ -238,14 +197,3 @@ $ curl -v \
     -H "Authorization: Bearer $TKN" \
     -X GET $API_GW_URL
 -----
-
-
-. 3scale automation examples:
-
-.. https://github.com/GuilhermeCamposo/demo_3scale/tree/main/ansible
-+
-Installation of base components:  3scale, apicurio-registry, microcks, minio RH-SSO, AMQ Streams and Tekton
-
-.. https://github.com/redhat-na-ssa/fhir-server-api-management/tree/main/ansible
-+
-Management of kube-native 3scale operator resources:  tenant, product application_plan, account, etc
