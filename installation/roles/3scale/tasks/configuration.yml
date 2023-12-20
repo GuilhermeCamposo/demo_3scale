@@ -91,9 +91,9 @@
     body:
       access_token: '{{ threescale_token }}'
       approval_required: 'false'
-      system_name: basic
+      system_name: basic2
       state_event: publish
-      name: Basic
+      name: Basic 2
     body_format: form-urlencoded
     status_code: 200,201,204
   register: r_application_plan

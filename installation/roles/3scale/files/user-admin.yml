@@ -1,0 +1,15 @@
+apiVersion: capabilities.3scale.net/v1beta1
+kind: DeveloperUser
+metadata:
+  name: test-user-admin
+  finalizers:
+    - developeruser.capabilities.3scale.net/finalizer
+spec:
+  developerAccountRef:
+    name: test-account
+  email: myusername2@example.com
+  passwordCredentialsRef:
+    name: test-user-admin
+    namespace: demo-3scale
+  role: admin
+  username: admin

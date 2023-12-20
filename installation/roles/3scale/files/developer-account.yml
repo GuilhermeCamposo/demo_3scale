@@ -1,0 +1,9 @@
+apiVersion: capabilities.3scale.net/v1beta1
+kind: DeveloperAccount
+metadata:
+  finalizers:
+    - developeraccount.capabilities.3scale.net/finalizer
+  name: test-account
+  namespace: demo-3scale
+spec:
+  orgName: Test Account

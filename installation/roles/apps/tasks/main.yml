@@ -17,4 +17,4 @@
     resource_definition: "{{ lookup('file', item) }}"
   loop: 
     - database-backend-dc.yml
-    - database-backend-svc.yml 
+    - database-backend-svc.yml

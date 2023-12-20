@@ -5,6 +5,7 @@
     verify_tls: false
     insecure_skip_tls_verify: true
     minio_stateful: false
+    tenant: prod
     threescale_project: demo-3scale
   tasks:
     - name: Check Required Parameters
@@ -44,7 +45,7 @@
 
     - name: Update Templates
       ansible.builtin.uri:
-        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item.id }}.json
+        url: https://{{ tenant }}-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item.id }}.json
         validate_certs: false
         method: PUT
         body:
@@ -61,7 +62,7 @@
 
     - name: Create Javascript
       ansible.builtin.uri:
-        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates.json
+        url: https://{{ tenant }}-admin.apps.{{ domain }}/admin/api/cms/templates.json
         validate_certs: false
         method: POST
         body:
@@ -79,13 +80,13 @@
       vars:
         draft: "{{ lookup('file', 'doc.js') }}"
 
-    - name: Set ID
+    - name: Set JS ID
       ansible.builtin.set_fact:
         id_doc_js: '{{ r_doc_create.json.id }}'
 
     - name: Create CSS
       ansible.builtin.uri:
-        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates.json
+        url: https://{{ tenant }}-admin.apps.{{ domain }}/admin/api/cms/templates.json
         validate_certs: false
         method: POST
         body:
@@ -103,13 +104,13 @@
       vars:
         draft: "{{ lookup('file', 'doc.css') }}"
 
-    - name: Set ID
+    - name: Set CSS ID
       ansible.builtin.set_fact:
         id_doc_css: '{{ r_doc_create.json.id }}'
 
     - name: Publish Drafts
       ansible.builtin.uri:
-        url: https://prod-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item }}/publish.json
+        url: https://{{ tenant }}-admin.apps.{{ domain }}/admin/api/cms/templates/{{ item }}/publish.json
         validate_certs: false
         method: PUT
         body:
