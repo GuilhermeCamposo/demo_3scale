@@ -46,6 +46,10 @@
   retries: 10
   delay: 30
 
+- name: Set Apicurio Registry
+  ansible.builtin.set_fact:
+    registry_host: "registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}"  
+
 - name: Evaluate the Service Registry CR
   kubernetes.core.k8s:
     api_key: '{{ token }}'
@@ -57,9 +61,9 @@
 
 - name: Wait for Service Registry to be running
   ansible.builtin.uri:
-    url: http://registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}
+    url: http://{{ registry_host }}
     status_code: '200'
   register: result
   until: result.status == 200
-  retries: 10
-  delay: 10
+  retries: 30
+  delay: 20
