@@ -1,5 +1,5 @@
-- hosts: localhost
-  name: Update Developer Portal
+- name: Update Developer Portal
+  hosts: localhost
   vars:
     delete_demo: false
     verify_tls: false
