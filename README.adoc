@@ -4,8 +4,8 @@ This repository demonstrates how to use many of 3scale's features.
 
 == Demo Last Tested with
 
-- OCP 4.13
-- oc client >= 4.13
+- OCP 4.15
+- oc client >= 4.15
 - 3scale 2.14
 
 
@@ -101,10 +101,10 @@ this demo has many different features that can me demonstrated for different pur
 
 === How to log in 3scale's console and SSO?
 
-both are using self-generated crendentials. 
+both are using self-generated credentials. 
 
 . Look for the `system-seed` secret for the 3scale's credentials in the `demo-3scale` project
-. Look for the `credential-example-keycloak` for SSO's crendentials in the `demo-rhsso` project
+. Look for the `credential-example-keycloak` for SSO's credentials in the `demo-rhsso` project
 
 === How to use the Postman collection?
 
@@ -114,14 +114,14 @@ the Postman collection has 3 requests:
 . GET Database API
 . POST Database API
 
-before starting using it, update the `cluster_domain` variable to reflect your OpenShift enviroment.
+before starting using it, update the `cluster_domain` variable to reflect your OpenShift environment.
 
 To be able to get an valid token from SSO, you need to update the *Request SSO Token* headers with the credentials generated for the application.
 Go to SSO console and retrieve the `client_id` and `client_secret` from the latest created client.
 
 === How to present SMTP configuration?
 
-SMTP configuiration is required for 3scale's notification system to be able to send emails.
+SMTP configuration is required for 3scale's notification system to be able to send emails.
 For this demo we can mock one using https://github.com/mailhog/MailHog[Mailhog]. To access it just hit the URL:
 
 ----
@@ -131,7 +131,7 @@ echo https://$URL
 
 === How to present 3scale and Registry integration with Tekton?
 
-This demo comes with a pipeline that downloads an Open API spec from Registry, publish it in 3scale and creates a configmap for an application to consume.
+This demo comes with a pipeline that downloads an Open API spec from Registry, publish it in 3scale and creates a ConfigMap for an application to consume.
 You can find it in the `demo-cicd` project.
 To demonstrate that feature you need an application like the one https://github.com/GuilhermeCamposo/demo_camel_k/tree/main[here].
 You will need to configure that API on 3scale.
@@ -186,7 +186,7 @@ $ curl -v \
     -d '{"name": "test", "email": "test@gmail.com" }'
 -----
 
-. Retreive list of _Attendee_ resources:
+. Retrieve list of _Attendee_ resources:
 +
 -----
 $ curl -v \

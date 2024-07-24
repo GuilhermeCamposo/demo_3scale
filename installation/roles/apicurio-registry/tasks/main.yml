@@ -48,7 +48,7 @@
 
 - name: Set Apicurio Registry
   ansible.builtin.set_fact:
-    registry_host: "registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}"  
+    registry_host: "registry.{{ apicurio_registry_project }}.router-default.{{ route_subdomain }}"
 
 - name: Evaluate the Service Registry CR
   kubernetes.core.k8s:

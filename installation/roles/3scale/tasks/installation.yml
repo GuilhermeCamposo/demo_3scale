@@ -26,8 +26,7 @@
     namespace: '{{ threescale_project }}'
     label_selectors:
       - app = 3scale-api-management
-      - rht.comp = 3scale
-      - rht.subcomp = 3scale_operator
+      - control-plane = controller-manager
     field_selectors:
       - status.phase=Running
   register: r_3scale_operator_pod
