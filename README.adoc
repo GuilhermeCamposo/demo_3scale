@@ -38,9 +38,22 @@ Remove code on: https://${3scale-admin-portal}/site/dns
 
 add a name for the provider here: https://${3scale-admin-portal}/p/admin/account/edit
 
-=== Update Developer Portal website
+=== Update Developer Portal Website
 
 In the `dev_portal` folder you will find an automation to update the Developer Portal in a specific environment. Run the playbook in the same way you run the installation playbook.
+
+=== Enabling Self-Service
+
+It's possible to set how user can create applications through the portal. This configuration is done in the `Product` configuration in the Admin Portal.
+To allow users to select how to create applications we have to: 
+
+* Be sure the user is subscribed in the *Default* Service of that *Product*. You can either set the service for each user manually or let the *Default* service enable for every new sign-up. If the service is not enabled, the user won't be able to select the product.
+
+image::docs/imgs/service-selection.png[service-selection]
+
+* Enable users to manage applications for the *Product*.
+
+image::docs/imgs/enable-manage-application.png[enable-manage-application]
 
 ==== Modifications
 
