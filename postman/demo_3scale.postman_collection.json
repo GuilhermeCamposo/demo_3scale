@@ -1,0 +1,291 @@
+{
+	"info": {
+		"_postman_id": "6f8eb3e1-4307-48d8-9f37-71b75e56c3fc",
+		"name": "demo_3scale",
+		"description": "Request samples for the demo: [https://github.com/GuilhermeCamposo/demo_3scale](https://github.com/GuilhermeCamposo/demo_3scale)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "720292"
+	},
+	"item": [
+		{
+			"name": "SSO Request Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "9442de3d",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "b8e27a2c1c2d0c32a3e99b73d5020756",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://keycloak-demo-rhsso.apps.{{cluster_domain}}/auth/realms/threescale-apps/protocol/openid-connect/token",
+					"protocol": "https",
+					"host": [
+						"keycloak-demo-rhsso",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"threescale-apps",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PROD - Database API List",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ4b3BFaDNxczBWaTRqQXhxRXczejJ6NmJhVUhSWG42bGI1M0RKOVJHbE9ZIn0.eyJleHAiOjE3MjQ4NTg1OTUsImlhdCI6MTcyNDg1ODI5NSwianRpIjoiMWJjM2I4ZjktZmFmMy00MWNiLWJlOGEtYzJjNTZmNjJmZjU3IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay1kZW1vLXJoc3NvLmFwcHMuY2x1c3Rlci1rNHg1di5rNHg1di5zYW5kYm94MTkzNi5vcGVudGxjLmNvbS9hdXRoL3JlYWxtcy90aHJlZXNjYWxlLWFwcHMiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiMzFiNjVmZjMtNTU3ZC00ZDhhLThlNjUtNDA0NzE4Y2VhNjIwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiOTQ0MmRlM2QiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy10aHJlZXNjYWxlLWFwcHMiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudEhvc3QiOiI5OC4yMTcuMTIxLjEyMCIsImNsaWVudElkIjoiOTQ0MmRlM2QiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC05NDQyZGUzZCIsImNsaWVudEFkZHJlc3MiOiI5OC4yMTcuMTIxLjEyMCJ9.HDPokpgQmtWDChIzMeIG-w0pdxWL5e7wfQ4MRTNK4hdskuY8T0qx7Ae46trYs8ni1tdAW5Xs8FOITQiM0UFxVmL3ceJiHSle87ukssPMXX1BEhXar6SXcLB5-UFbJlMqtGO-sOjY3_eUunu0qsDnQNt__VyQRvxdDsKYQR09SN1iM7xfeNG9aTHX6-cL61teDyD4OVfUqMmhyuc4WnkO09LYhuSHXo9AkASq6rWWeVcVyD7FJW7MN4CBwFwhqyvqiFvldUfhwI2ZoLfB8F0o-A54vPN6yfgtPhdezFPYyal3zNrCF2kslEg5-zcLwz25GWlKIozYixE1UQTtW38gIg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://database-api-prod-apicast-staging.apps.{{cluster_domain}}/backend",
+					"protocol": "https",
+					"host": [
+						"database-api-prod-apicast-staging",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PROD - Database API Save",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJ4b3BFaDNxczBWaTRqQXhxRXczejJ6NmJhVUhSWG42bGI1M0RKOVJHbE9ZIn0.eyJleHAiOjE3MjQ4NTYxNDAsImlhdCI6MTcyNDg1NTg0MCwianRpIjoiMDEwYzk2MGMtNTczYi00ZGI4LThmMmUtMTJkYjU1M2UzYjg4IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay1kZW1vLXJoc3NvLmFwcHMuY2x1c3Rlci1rNHg1di5rNHg1di5zYW5kYm94MTkzNi5vcGVudGxjLmNvbS9hdXRoL3JlYWxtcy90aHJlZXNjYWxlLWFwcHMiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiNzA3Zjk0NTctNTIzNS00ZTlkLWEwZTEtMmRiNTRjOTVjMDJjIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiNTEyOTdkY2UiLCJhY3IiOiIxIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy10aHJlZXNjYWxlLWFwcHMiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoicHJvZmlsZSBlbWFpbCIsImNsaWVudElkIjoiNTEyOTdkY2UiLCJjbGllbnRIb3N0IjoiOTguMjE3LjEyMS4xMjAiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC01MTI5N2RjZSIsImNsaWVudEFkZHJlc3MiOiI5OC4yMTcuMTIxLjEyMCJ9.bz5V960p-rWBBlJ8nI-6BFee9ecXsVWhRCCSaTO336hXdqEBI_jqa9kuFE6xUx8gA0Yx0RIdCwhMsVHc_gtY8aJgy4Gfkd5Usic8bPon182A3cerq4A345KGcvDZSsicXs5xUFKz83rCdUNVMKjDX8N1yQ0475w4qWEss6SkFKw2cWrJZZN4TVIzn7_N-GNCBIQU6kvtFeqIAwSKRTC9aEpSVxUHStdSX6IV59mVzbzeZFYet0IOZ90MNs1F4nUbIXgjdu8RI_yD2E7hnWqJpSB75KQO04cLHsqcJf9KV_l6iyMgE617ks0foS3ETv2sic23FDMSiEzi6fV-ev-rwA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"test2\", \"email\": \"test2@gmail.com\" }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://database-api-prod-apicast-staging.apps.{{cluster_domain}}/backend",
+					"protocol": "https",
+					"host": [
+						"database-api-prod-apicast-staging",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"backend"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Accounts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://prod-admin.apps.{{cluster_domain}}/admin/api/accounts.json?access_token={{threescale_admin_token}}",
+					"protocol": "https",
+					"host": [
+						"prod-admin",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"admin",
+						"api",
+						"accounts.json"
+					],
+					"query": [
+						{
+							"key": "access_token",
+							"value": "{{threescale_admin_token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List Invoices",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://prod-admin.apps.{{cluster_domain}}/api/invoices.json?access_token={{threescale_admin_token}}",
+					"protocol": "https",
+					"host": [
+						"prod-admin",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"api",
+						"invoices.json"
+					],
+					"query": [
+						{
+							"key": "access_token",
+							"value": "{{threescale_admin_token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MASTER API - Providers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://master.apps.{{cluster_domain}}/admin/api/provider.json?access_token=7b2b2c5d65455f2b9a53c65c912900787bc14b5ea6b166d45f3df1bf900afec9",
+					"protocol": "https",
+					"host": [
+						"master",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"admin",
+						"api",
+						"provider.json"
+					],
+					"query": [
+						{
+							"key": "access_token",
+							"value": "7b2b2c5d65455f2b9a53c65c912900787bc14b5ea6b166d45f3df1bf900afec9"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "MASTER API - Billing",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "date",
+							"value": "2024-08-28",
+							"type": "text"
+						},
+						{
+							"key": "access_token",
+							"value": "7b2b2c5d65455f2b9a53c65c912900787bc14b5ea6b166d45f3df1bf900afec9",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://master.apps.{{cluster_domain}}/master/api/providers/2/billing_jobs.xml",
+					"protocol": "https",
+					"host": [
+						"master",
+						"apps",
+						"{{cluster_domain}}"
+					],
+					"path": [
+						"master",
+						"api",
+						"providers",
+						"2",
+						"billing_jobs.xml"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "cluster_domain",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "threescale_admin_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
