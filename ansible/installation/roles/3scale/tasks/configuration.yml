@@ -139,6 +139,8 @@
     - token is not none
     - token|trim() != ""
   ignore_errors: false
+  register: my_output
+  changed_when: my_output.rc != 0
 
 - name: Config 3scale SMTP address
   ansible.builtin.command: |

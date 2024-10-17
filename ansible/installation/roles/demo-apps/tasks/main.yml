@@ -15,6 +15,6 @@
     state: present
     namespace: '{{ apps_project }}'
     resource_definition: "{{ lookup('file', item) }}"
-  loop: 
+  loop:
     - database-backend-dc.yml
     - database-backend-svc.yml

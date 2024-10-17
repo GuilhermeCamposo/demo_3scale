@@ -79,7 +79,7 @@
     validate_certs: false
     state: present
     namespace: '{{ kafka_project }}'
-    name: '{{ kafka_cluster_name }}'
+    name: '{{ streams_kafka_cluster_name }}'
     resource_definition: "{{ lookup('file', 'cluster.yml') }}"
 
 - name: Wait for AMQ Streams cluster to be running
@@ -90,7 +90,7 @@
     api_version: kafka.strimzi.io/v1beta2
     kind: Kafka
     namespace: '{{ kafka_project }}'
-    name: '{{ kafka_cluster_name }}'
+    name: '{{ streams_kafka_cluster_name }}'
   register: r_kafka
   retries: 20
   delay: 15

@@ -48,9 +48,10 @@
       ansible.builtin.include_role:
         name: mailhog
 
-    - name: Include Monitoring
-      ansible.builtin.include_role:
-        name: monitoring
+    # removing Grafana for now. v4 Channel removed
+    # - name: Include Monitoring
+    #   ansible.builtin.include_role:
+    #     name: monitoring
 
     - name: Include Microcks
       ansible.builtin.include_role:
@@ -64,9 +65,9 @@
       ansible.builtin.include_role:
         name: 3scale
 
-    - name: Include Apps
+    - name: Include Demo Apps
       ansible.builtin.include_role:
-        name: apps
+        name: demo-apps
 
     - name: Include Streams
       ansible.builtin.include_role:
