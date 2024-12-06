@@ -37,7 +37,8 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    resource_definition: "{{ lookup('template', 'database_backend.yml.j2') }}"
+    namespace: '{{ threescale_project }}'
+    resource_definition: "{{ lookup('template', 'database-backend.yml.j2') }}"
 
 - name: Check if Database Backend is Synced
   kubernetes.core.k8s_info:
@@ -61,6 +62,7 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
+    namespace: '{{ threescale_project }}'
     resource_definition: "{{ lookup('template', 'database-product.yml.j2') }}"
 
 - name: Check if Database Product is Synced
@@ -156,13 +158,13 @@
   changed_when: my_output.rc != 0
 
 - name: Bounce 3scale system-app
-  ansible.builtin.command: "oc rollout latest dc/system-app -n {{ threescale_project }}"
+  ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=app' -n {{ threescale_project }}"
   ignore_errors: false
   register: my_output
   changed_when: my_output.rc != 0
 
 - name: Bounce 3scale system-sidekiq
-  ansible.builtin.command: "oc rollout latest dc/system-sidekiq -n {{ threescale_project }}"
+  ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=sidekiq' -n {{ threescale_project }}"
   ignore_errors: false
   register: my_output
   changed_when: my_output.rc != 0

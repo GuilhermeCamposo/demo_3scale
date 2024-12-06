@@ -2,16 +2,13 @@
   ansible.builtin.include_tasks: provision_pipelines.yml
   when:
     - enable_pipelines
-    - not delete_demo
 
 - name: Configure 3scale Demo Pipelines
   ansible.builtin.include_tasks: configure_pipelines.yml
   when:
     - enable_pipelines
-    - not delete_demo
 
 - name: Delete Pipeline
   ansible.builtin.include_tasks: delete_pipeline.yml
   when:
-    - delete_demo | bool
     - enable_pipelines

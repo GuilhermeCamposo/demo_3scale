@@ -2,7 +2,6 @@ apiVersion: capabilities.3scale.net/v1beta1
 kind: Product
 metadata:
   name: database-api
-  namespace: '{{ threescale_project }}'
 spec:
   name: Database API
   description: Database API Product
@@ -46,6 +45,6 @@ spec:
     database-backend:
       path: /
   applicationPlans:
-    basic:
+    demo-basic:
       name: "Database API Basic"
       published: true

@@ -10,7 +10,6 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: gp2
   volumeMode: Filesystem
 ---
 apiVersion: apps/v1
@@ -30,31 +29,29 @@ spec:
       labels:
         app: minio
     spec:
-      # Refer to the PVC created earlier
       volumes:
       - name: storage
         persistentVolumeClaim:
-          # Name of the PVC created earlier
           claimName: minio-pvc
       containers:
       - name: minio
-        # Pulls the default Minio image from Docker Hub
-        image: minio/minio:RELEASE.2020-12-29T23-29-29Z
+        image: minio/minio:RELEASE.2024-10-02T17-50-41Z-cpuv1
         args:
         - server
         - /storage
+        - '--console-address'
+        - ':9001'
         env:
-        # Minio access key and secret key
-        - name: MINIO_ACCESS_KEY
+        - name: MINIO_ROOT_USER
           value: "minio"
-        - name: MINIO_SECRET_KEY
+        - name: MINIO_ROOT_PASSWORD
           value: "minio123"
         - name: MINIO_REGION_NAME
           value: "us-west-rack2"
         ports:
         - containerPort: 9000
         volumeMounts:
-        - name: storage # must match the volume name, above
+        - name: storage
           mountPath: "/storage"
 ---
 apiVersion: v1
@@ -67,17 +64,21 @@ spec:
   - port: 9000
     protocol: TCP
     targetPort: 9000
+    name: api
+  - port: 9001
+    protocol: TCP
+    targetPort: 9001
+    name: console
   selector:
     app: minio
   sessionAffinity: None
   type: ClusterIP
-
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: minio
-  namespace: 3scale-project
+  namespace: '{{ threescale_project }}'
 spec:
   port:
     targetPort: 9000
@@ -86,3 +87,19 @@ spec:
     name: minio
     weight: 100
   wildcardPolicy: None
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: minio-console
+  namespace: '{{ threescale_project }}'
+spec:
+  port:
+    targetPort: console
+  to:
+    kind: Service
+    name: minio
+    weight: 100
+  tls:
+    termination: edge
+  wildcardPolicy: None  

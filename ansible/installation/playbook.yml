@@ -1,7 +1,6 @@
 - name: Install 3scale Demo
   hosts: localhost
   vars:
-    delete_demo: false
     verify_tls: false
     insecure_skip_tls_verify: true
     minio_stateful: false
