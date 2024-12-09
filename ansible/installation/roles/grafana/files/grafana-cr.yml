@@ -1,3 +1,4 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -15,3 +16,16 @@ rules:
       - authorization.k8s.io
     resources:
       - subjectaccessreviews
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: grafana-viewer
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - ''
+      - route.openshift.io
+    resources:
+      - routes

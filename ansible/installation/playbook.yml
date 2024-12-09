@@ -3,17 +3,17 @@
   vars:
     verify_tls: false
     insecure_skip_tls_verify: true
-    minio_stateful: false
     threescale_project: demo-3scale
+    grafana_project: demo-3scale
     rhsso_project: demo-rhsso
     apps_project: demo-apps
+    camel_k_project: demo-apps
     apicurito_project: demo-tools
     microcks_project: demo-tools
     mailhog_project: demo-tools
     apicurio_registry_project: demo-tools
     kafka_project: demo-tools
     cicd_project: demo-cicd
-    camel_k_project: demo-apps
     # 3scale SSO
     threescale_client_id: threescale
     threescale_client_secret: d141e6ca-707a-4de9-a9c2-696d21890b37
@@ -47,10 +47,9 @@
       ansible.builtin.include_role:
         name: mailhog
 
-    # removing Grafana for now. v4 Channel removed
-    # - name: Include Monitoring
-    #   ansible.builtin.include_role:
-    #     name: monitoring
+    - name: Include Grafana
+      ansible.builtin.include_role:
+        name: grafana
 
     - name: Include Microcks
       ansible.builtin.include_role:

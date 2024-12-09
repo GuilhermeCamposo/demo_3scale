@@ -1,3 +1,4 @@
+---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDatasource
 metadata:
@@ -18,5 +19,4 @@ spec:
     url: 'https://thanos-querier.openshift-monitoring.svc.cluster.local:9091'
   instanceSelector:
     matchLabels:
-      dashboards: grafana-a  
-  name: prometheus-grafanadatasource.yaml
+      apim-management: grafana

@@ -4,7 +4,6 @@
     delete_demo: false
     verify_tls: false
     insecure_skip_tls_verify: true
-    minio_stateful: false
     tenant: prod
     threescale_project: demo-3scale
   tasks:

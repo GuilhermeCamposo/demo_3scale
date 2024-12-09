@@ -1,14 +1,14 @@
-- name: Evaluate namespace {{ threescale_project }}
+- name: Evaluate Namespace {{ grafana_project }}
   kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: '{{ verify_tls }}'
+    validate_certs: false
     api_version: v1
     kind: Namespace
-    name: '{{ threescale_project }}'
+    name: '{{ grafana_project }}'
     state: present
 
-- name: Evaluate Group {{ threescale_project }}
+- name: Evaluate Group {{ grafana_project }}
   kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
@@ -16,13 +16,13 @@
     state: present
     kind: OperatorGroup
     api_version: operators.coreos.com/v1
-    namespace: '{{ threescale_project }}'
+    namespace: '{{ grafana_project }}'
     definition:
       metadata:
-        name: '{{ threescale_project }}-group'
+        name: '{{ grafana_project }}-group'
       spec:
         targetNamespaces:
-          - '{{ threescale_project }}'
+          - '{{ grafana_project }}'
 
 - name: Evaluate User Workload Monitoring
   kubernetes.core.k8s:
@@ -51,7 +51,7 @@
     definition:
       metadata:
         name: grafana-operator
-        namespace: '{{ threescale_project }}'
+        namespace: '{{ grafana_project }}'
       spec:
         channel: v5
         installPlanApproval: Automatic
@@ -59,45 +59,40 @@
         source: community-operators
         sourceNamespace: openshift-marketplace
 
-- name: Wait Grafana Operator
+- name: Check if Grafana CRD exists
   kubernetes.core.k8s_info:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
-    api_version: v1
-    kind: Pod
-    namespace: '{{ threescale_project }}'
-    label_selectors:
-      - app.kubernetes.io/name=grafana-operator
-    field_selectors:
-      - status.phase=Running
-  register: r_grafana_operator_pod
-  retries: 20
+    kind: CustomResourceDefinition
+    api_version: apiextensions.k8s.io/v1
+    name: grafanas.grafana.integreatly.org
+  register: crd_result
+  retries: 220
   delay: 10
-  until: r_grafana_operator_pod.resources | list | length == 1
+  until: crd_result.resources | length > 0
 
-- name: Evaluate Grafana Instance
+- name: Check Grafana CR
   kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
-    validate_certs: false
+    validate_certs: '{{ verify_tls }}'
     state: present
-    namespace: '{{ threescale_project }}'
-    resource_definition: "{{ lookup('file', 'grafana_oauth_instance.yml') }}"
+    resource_definition: "{{ lookup('file', 'grafana-cr.yml') }}"
 
-- name: Wait Grafana Instance
-  kubernetes.core.k8s_info:
+- name: Check Grafana Instances
+  kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
-    api_version: v1
-    kind: Pod
-    namespace: '{{ threescale_project }}'
-    label_selectors:
-      - app = grafana
-    field_selectors:
-      - status.phase=Running
-  register: r_grafana_pod
-  retries: 20
-  delay: 10
-  until: r_grafana_pod.resources | list | length == 1
+    state: present
+    namespace: '{{ grafana_project }}'
+    resource_definition: "{{ lookup('template', 'grafana-oauth-instance.yml.j2') }}"
+
+- name: Check User Permission
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: '{{ verify_tls }}'
+    state: present
+    resource_definition: "{{ lookup('template', 'grafana-crb.yml.j2') }}"
