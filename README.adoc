@@ -4,8 +4,8 @@ This repository demonstrates how to use many of 3scale's features.
 
 == Demo Last Tested with
 
-- OCP 4.16
-- oc CLI 4.16
+- OCP < 4.16
+- oc CLI < 4.16
 - 3scale 2.14
 
 
