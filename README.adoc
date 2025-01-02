@@ -22,9 +22,18 @@ This repository demonstrates how to use many of 3scale's features.
 
 ===  How to run the playbook
 
+To install all components available:
+
 ----
 ansible-playbook -e token=${token} -e server=${server} playbook.yml
 ----
+
+If you want to install specific components, you can use Ansible tags, like: 
+
+----
+ansible-playbook -e token=${token} -e server=${server} --tags "threescale" playbook.yml
+----
+
 
 == Manual steps
 

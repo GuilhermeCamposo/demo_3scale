@@ -30,51 +30,84 @@
       when:
         - (server is not defined) or (token is not defined) or (server is none) or (token is none)
       ignore_errors: false
+      tags: [rhsso, threescale, registry, apicurito, tekton, microcks]
 
     - name: Set domain
       ansible.builtin.set_fact:
         domain: "{{ server | regex_replace('https://api.') | regex_replace(':6443') }}"
+      tags: [rhsso, threescale, registry, apicurito, tekton, microcks]
 
     - name: Set Subdomain
       ansible.builtin.set_fact:
         route_subdomain: "apps.{{ domain }}"
+      tags: [rhsso, threescale, registry, apicurito, tekton, microcks]
 
     - name: Include RHSSO
       ansible.builtin.include_role:
         name: rhsso
+        apply:
+          tags: [rhsso, threescale]
+      tags: [rhsso, threescale]
 
     - name: Include Mailhog
       ansible.builtin.include_role:
         name: mailhog
+        apply:
+          tags: [threescale]
+      tags: [threescale]
 
     - name: Include Grafana
       ansible.builtin.include_role:
         name: grafana
-
-    - name: Include Microcks
-      ansible.builtin.include_role:
-        name: microcks
-
-    - name: Include Apicurito
-      ansible.builtin.include_role:
-        name: apicurito
+        apply:
+          tags: [threescale]
+      tags: [threescale]
 
     - name: Include 3scale
       ansible.builtin.include_role:
         name: 3scale
+        apply:
+          tags: [threescale]
+      tags: [threescale]
 
     - name: Include Demo Apps
       ansible.builtin.include_role:
         name: demo-apps
+        apply:
+          tags: [threescale]
+      tags: [threescale]
 
     - name: Include Streams
       ansible.builtin.include_role:
         name: streams
+        apply:
+          tags: [registry]
+      tags: [registry]
 
     - name: Include Service Registry
       ansible.builtin.include_role:
         name: apicurio-registry
+        apply:
+          tags: [registry]
+      tags: [registry]
+
+    - name: Include Apicurito
+      ansible.builtin.include_role:
+        name: apicurito
+        apply:
+          tags: [apicurito]
+      tags: [apicurito]
 
     - name: Include Tekton
       ansible.builtin.include_role:
         name: tekton
+        apply:
+          tags: [tekton]
+      tags: [tekton]
+
+    - name: Include Microcks
+      ansible.builtin.include_role:
+        name: microcks
+        apply:
+          tags: [microcks]
+      tags: [microcks]
