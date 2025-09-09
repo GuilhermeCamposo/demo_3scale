@@ -1,11 +1,11 @@
-- name: Evaluate namespace {{ mailhog_project }}
+- name: Evaluate namespace {{ mailhog_ns }}
   kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
     api_version: v1
     kind: Namespace
-    name: '{{ mailhog_project }}'
+    name: '{{ mailhog_ns }}'
     state: present
 
 - name: Evaluate Mailhog Manifests
@@ -14,7 +14,7 @@
     host: '{{ server }}'
     validate_certs: '{{ verify_tls }}'
     state: present
-    namespace: '{{ mailhog_project }}'
+    namespace: '{{ mailhog_ns }}'
     resource_definition: "{{ lookup('file', item) }}"
   with_items:
     - deployment.yml
@@ -28,7 +28,7 @@
     validate_certs: '{{ verify_tls }}'
     api_version: v1
     kind: Pod
-    namespace: '{{ mailhog_project }}'
+    namespace: '{{ mailhog_ns }}'
     label_selectors:
       - deployment = mailhog
     field_selectors:

@@ -149,7 +149,7 @@
 
     - name: Config 3scale SMTP address
       ansible.builtin.command: |
-        oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{threescale_project}}
+        oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_ns }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
       ignore_errors: false
       register: my_output
       changed_when: my_output.rc != 0
