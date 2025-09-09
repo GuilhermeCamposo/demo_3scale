@@ -82,20 +82,20 @@
     name: '{{ streams_kafka_cluster_name }}'
     resource_definition: "{{ lookup('file', 'cluster.yml') }}"
 
-- name: Wait for AMQ Streams cluster to be running
-  kubernetes.core.k8s_info:
-    api_key: '{{ token }}'
-    host: '{{ server }}'
-    validate_certs: false
-    api_version: kafka.strimzi.io/v1beta2
-    kind: Kafka
-    namespace: '{{ kafka_project }}'
-    name: '{{ streams_kafka_cluster_name }}'
-  register: r_kafka
-  retries: 20
-  delay: 15
-  until:
-    - r_kafka.resources[0] is defined
-    - r_kafka.resources[0].status is defined
-    - r_kafka.resources[0].status.conditions[0].type == 'Ready'
-    - r_kafka.resources[0].status.conditions[0].status == 'True'
+# - name: Wait for AMQ Streams cluster to be running
+#   kubernetes.core.k8s_info:
+#     api_key: '{{ token }}'
+#     host: '{{ server }}'
+#     validate_certs: false
+#     api_version: kafka.strimzi.io/v1beta2
+#     kind: Kafka
+#     namespace: '{{ kafka_project }}'
+#     name: '{{ streams_kafka_cluster_name }}'
+#   register: r_kafka
+#   retries: 20
+#   delay: 15
+#   until:
+#     - r_kafka.resources[0] is defined
+#     - r_kafka.resources[0].status is defined
+#     - r_kafka.resources[0].status.conditions[0].type == 'Ready'
+#     - r_kafka.resources[0].status.conditions[0].status == 'True'

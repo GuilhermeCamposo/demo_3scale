@@ -1,13 +1,11 @@
 apiVersion: capabilities.3scale.net/v1beta1
 kind: Application
 metadata:
-  finalizers:
-    - application.capabilities.3scale.net/finalizer
   name: test-app
 spec:
   accountCR:
-    name: test-account
-  applicationPlanName: basic
+    name: demo-org
+  applicationPlanName: demo-basic
   description: Test App for the demo
   name: test-app
   productCR:

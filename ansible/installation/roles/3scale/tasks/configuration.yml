@@ -81,90 +81,147 @@
   retries: 10
   delay: 15
 
-- name: Set productId
-  ansible.builtin.set_fact:
-    product_id: '{{ r_product.resources[0].status.productId }}'
-
-- name: Create Application Plan
-  ansible.builtin.uri:
-    url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/application_plans.json
+- name: Evaluate Org and User
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
     validate_certs: false
-    method: POST
-    body:
-      access_token: '{{ threescale_token }}'
-      approval_required: 'false'
-      system_name: basic2
-      state_event: publish
-      name: Basic 2
-    body_format: form-urlencoded
-    status_code: 200,201,204
-  register: r_application_plan
+    state: present
+    namespace: '{{ threescale_project }}'
+    resource_definition: "{{ lookup('file', item) }}"
+  loop:
+    - 'user-secret.yml'
+    - 'user.yml'
+    - 'account.yml'
 
-# Using the default account
-- name: Create Application
-  ansible.builtin.uri:
-    url: https://prod-admin.apps.{{ domain }}/admin/api/accounts/3/applications.json
+- name: Check if Account is Synced
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
     validate_certs: false
-    method: POST
-    body:
-      access_token: '{{ threescale_token }}'
-      plan_id: '{{ r_application_plan.json.application_plan.id }}'
-      name: test-app
-      description: 'Test App for the demo'
-    body_format: form-urlencoded
-    status_code: 200,201,204
-  register: r_application
+    kind: DeveloperAccount
+    name: demo-org
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_account
+  until:
+    - r_account.resources is defined
+    - r_account.resources[0].status.accountID is defined
+  retries: 10
+  delay: 15
 
-- name: Set Backend client_id
-  ansible.builtin.set_fact:
-    backend_client_id: '{{ r_application.json.application.client_id }}'
-
-- name: Set Backend client_secret
-  ansible.builtin.set_fact:
-    backend_client_secret: '{{ r_application.json.application.client_secret }}'
-
-- name: Deploy to Staging
-  ansible.builtin.uri:
-    url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/proxy/deploy.json
+- name: Evaluate Application
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
     validate_certs: false
-    method: POST
-    body:
-      access_token: '{{ threescale_token }}'
-    body_format: form-urlencoded
-    status_code: 200,201,204
-  register: r_application
+    state: present
+    namespace: '{{ threescale_project }}'
+    resource_definition: "{{ lookup('file', 'application.yml') }}"
 
-- name: Log in as super user with token on OpenShift 4
-  ansible.builtin.command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
-  when:
-    - token is defined
-    - token is not none
-    - token|trim() != ""
-  ignore_errors: false
-  register: my_output
-  changed_when: my_output.rc != 0
+- name: Check if Application is Synced
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Application
+    name: test-app
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_account
+  until:
+    - r_account.resources is defined
+    - r_account.resources[0].status.applicationID is defined
+  retries: 10
+  delay: 15
 
-- name: Config 3scale SMTP address
-  ansible.builtin.command: |
-    oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
-  ignore_errors: false
-  register: my_output
-  changed_when: my_output.rc != 0
+- name: Configure SMTP
+  block:
+    - name: Log in as super user with token on OpenShift 4
+      ansible.builtin.command: "oc login --token={{ token }}  --server={{ server }} --insecure-skip-tls-verify={{ insecure_skip_tls_verify }}"
+      when:
+        - token is defined
+        - token is not none
+        - token|trim() != ""
+      ignore_errors: false
+      register: my_output
+      changed_when: my_output.rc != 0
 
-- name: Config 3scale SMTP port
-  ansible.builtin.command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
-  ignore_errors: false
-  register: my_output
-  changed_when: my_output.rc != 0
+    - name: Config 3scale SMTP address
+      ansible.builtin.command: |
+        oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_project }}{%raw%}"}}'{%endraw%} -n {{threescale_project}}
+      ignore_errors: false
+      register: my_output
+      changed_when: my_output.rc != 0
 
-- name: Bounce 3scale system-app
-  ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=app' -n {{ threescale_project }}"
-  ignore_errors: false
-  register: my_output
-  changed_when: my_output.rc != 0
+    - name: Config 3scale SMTP port
+      ansible.builtin.command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
+      ignore_errors: false
+      register: my_output
+      changed_when: my_output.rc != 0
 
-- name: Bounce 3scale system-sidekiq
-  ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=sidekiq' -n {{ threescale_project }}"
-  ignore_errors: false
-  register: my_output
-  changed_when: my_output.rc != 0
+    - name: Bounce 3scale system-app
+      ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=app' -n {{ threescale_project }}"
+      ignore_errors: false
+      register: my_output
+      changed_when: my_output.rc != 0
+
+    - name: Bounce 3scale system-sidekiq
+      ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=sidekiq' -n {{ threescale_project }}"
+      ignore_errors: false
+      register: my_output
+      changed_when: my_output.rc != 0
+
+
+# - name: Set productId
+#   ansible.builtin.set_fact:
+#     product_id: '{{ r_product.resources[0].status.productId }}'
+
+# - name: Create Application Plan
+#   ansible.builtin.uri:
+#     url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/application_plans.json
+#     validate_certs: false
+#     method: POST
+#     body:
+#       access_token: '{{ threescale_token }}'
+#       approval_required: 'false'
+#       system_name: basic2
+#       state_event: publish
+#       name: Basic 2
+#     body_format: form-urlencoded
+#     status_code: 200,201,204
+#   register: r_application_plan
+
+# # Using the default account
+# - name: Create Application
+#   ansible.builtin.uri:
+#     url: https://prod-admin.apps.{{ domain }}/admin/api/accounts/3/applications.json
+#     validate_certs: false
+#     method: POST
+#     body:
+#       access_token: '{{ threescale_token }}'
+#       plan_id: '{{ r_application_plan.json.application_plan.id }}'
+#       name: test-app
+#       description: 'Test App for the demo'
+#     body_format: form-urlencoded
+#     status_code: 200,201,204
+#   register: r_application
+
+# - name: Set Backend client_id
+#   ansible.builtin.set_fact:
+#     backend_client_id: '{{ r_application.json.application.client_id }}'
+
+# - name: Set Backend client_secret
+#   ansible.builtin.set_fact:
+#     backend_client_secret: '{{ r_application.json.application.client_secret }}'
+
+# - name: Deploy to Staging
+#   ansible.builtin.uri:
+#     url: https://prod-admin.apps.{{ domain }}/admin/api/services/{{ product_id }}/proxy/deploy.json
+#     validate_certs: false
+#     method: POST
+#     body:
+#       access_token: '{{ threescale_token }}'
+#     body_format: form-urlencoded
+#     status_code: 200,201,204
+#   register: r_application
