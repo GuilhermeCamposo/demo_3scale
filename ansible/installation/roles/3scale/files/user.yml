@@ -9,4 +9,4 @@ spec:
   passwordCredentialsRef:
     name: demo-user-secret
   role: admin
-  username: admin
+  username: demoadmin

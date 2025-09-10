@@ -5,6 +5,84 @@
     name: '{{ apps_project }}'
     state: present
 
+- name: Get system-seed secret
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Secret
+    name: system-seed
+    namespace: '{{ threescale_project }}'
+    api_version: v1
+  register: r_system_seed
+  until:
+    - r_system_seed.resources is defined
+    - r_system_seed.resources[0] is defined
+  retries: 10
+  delay: 15
+
+- name: Set admin token
+  ansible.builtin.set_fact:
+    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
+
+- name: Get Account
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: DeveloperAccount
+    name: demo-org
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_account
+  until:
+    - r_account.resources is defined
+    - r_account.resources[0].status.accountID is defined
+  retries: 10
+  delay: 15
+
+- name: Get Application ID
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    kind: Application
+    name: test-app
+    namespace: '{{ threescale_project }}'
+    api_version: capabilities.3scale.net/v1beta1
+  register: r_app
+  until:
+    - r_app.resources is defined
+    - r_app.resources[0].status.applicationID is defined
+  retries: 10
+  delay: 15
+
+- name: Set app_id
+  ansible.builtin.set_fact:
+    app_id: '{{ r_app.resources[0].status.applicationID }}'
+
+- name: Set acc_id
+  ansible.builtin.set_fact:
+    acc_id: 'r_account.resources[0].status.accountID'
+
+- name: Get Application
+  ansible.builtin.uri:
+    url: https://prod-admin.apps.{{ domain }}/admin/api/accounts/{{ acc_id }}/applications/{{ app_id }}.json?access_token={{ threescale_token }}
+    validate_certs: false
+    method: GET
+    status_code: 200
+  register: r_application
+  retries: 10
+  delay: 15
+
+- name: Set Backend client_id
+  ansible.builtin.set_fact:
+    backend_client_id: '{{ r_application.json.application.client_id }}'
+
+- name: Set Backend client_secret
+  ansible.builtin.set_fact:
+    backend_client_secret: '{{ r_application.json.application.client_secret }}'
+
 - name: Evaluate backend-secret
   kubernetes.core.k8s:
     state: present
