@@ -63,7 +63,7 @@
 
 - name: Set acc_id
   ansible.builtin.set_fact:
-    acc_id: 'r_account.resources[0].status.accountID'
+    acc_id: '{{ r_account.resources[0].status.accountID }}'
 
 - name: Get Application
   ansible.builtin.uri:

@@ -84,12 +84,12 @@
           tags: [registry]
       tags: [registry]
 
-    - name: Include Service Registry
-      ansible.builtin.include_role:
-        name: apicurio-registry
-        apply:
-          tags: [registry]
-      tags: [registry]
+    # - name: Include Service Registry
+    #   ansible.builtin.include_role:
+    #     name: apicurio-registry
+    #     apply:
+    #       tags: [registry]
+    #   tags: [registry]
 
     - name: Include Apicurito
       ansible.builtin.include_role:
