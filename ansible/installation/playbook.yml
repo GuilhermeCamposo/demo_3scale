@@ -9,7 +9,8 @@
     apps_project: demo-apps
     camel_k_project: demo-apps
     apicurito_project: demo-tools
-    microcks_project: demo-tools
+    kafka_ns: demo-tools
+    kafka_cluster_name: my-cluster
     mailhog_ns: demo-tools
     apicurio_registry_project: demo-tools
     kafka_project: demo-tools
@@ -20,8 +21,6 @@
     enable_user_workload_monitoring: true
     grafana_password: 3scale
     grafana_user: admin
-    microcks_username: microckstester
-    microcks_password: microckstester
     enable_pipelines: true
   tasks:
     - name: Check Required Parameters
@@ -77,19 +76,19 @@
           tags: [threescale]
       tags: [threescale]
 
-    - name: Include Streams
+    - name: Include Kafka
       ansible.builtin.include_role:
-        name: streams
+        name: kafka
         apply:
           tags: [registry]
       tags: [registry]
 
-    # - name: Include Service Registry
-    #   ansible.builtin.include_role:
-    #     name: apicurio-registry
-    #     apply:
-    #       tags: [registry]
-    #   tags: [registry]
+    - name: Include Service Registry
+      ansible.builtin.include_role:
+        name: apicurio-registry
+        apply:
+          tags: [registry]
+      tags: [registry]
 
     - name: Include Apicurito
       ansible.builtin.include_role:
@@ -104,10 +103,3 @@
         apply:
           tags: [tekton]
       tags: [tekton]
-
-    - name: Include Microcks
-      ansible.builtin.include_role:
-        name: microcks
-        apply:
-          tags: [microcks]
-      tags: [microcks]

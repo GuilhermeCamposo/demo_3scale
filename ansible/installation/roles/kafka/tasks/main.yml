@@ -1,14 +1,12 @@
-- name: Evaluate Namespace {{ kafka_project }}
+- name: Evaluate Namespace {{ kafka_ns }}
   kubernetes.core.k8s:
     api_key: '{{ token }}'
     host: '{{ server }}'
     validate_certs: false
+    api_version: v1
+    kind: Namespace
+    name: '{{ kafka_ns }}'
     state: present
-    kind: Project
-    api_version: project.openshift.io/v1
-    definition:
-      metadata:
-        name: "{{ kafka_project }}"
 
 - name: Evaluate Operator Group
   kubernetes.core.k8s:
@@ -20,11 +18,11 @@
     kind: OperatorGroup
     definition:
       metadata:
-        name: '{{ kafka_project }}-group'
-        namespace: '{{ kafka_project }}'
+        name: '{{ kafka_ns }}-group'
+        namespace: '{{ kafka_ns }}'
       spec:
         targetNamespaces:
-          - '{{ kafka_project }}'
+          - '{{ kafka_ns }}'
 
 - name: Evaluate AMQ Streams Operator
   kubernetes.core.k8s:
@@ -37,9 +35,9 @@
     definition:
       metadata:
         name: amq-streams
-        namespace: '{{ kafka_project }}'
+        namespace: '{{ kafka_ns }}'
       spec:
-        channel: stable
+        channel: '{{ kafka_operator_channel }}'
         installPlanApproval: Automatic
         name: amq-streams
         source: redhat-operators
@@ -52,16 +50,16 @@
     validate_certs: false
     api_version: v1
     kind: Pod
-    namespace: '{{ kafka_project }}'
+    namespace: '{{ kafka_ns }}'
     label_selectors:
       - rht.comp=AMQ_Streams
       - rht.subcomp=cluster-operator
     field_selectors:
       - status.phase=Running
-  register: r_streams_pod
+  register: kafka_r_pod
   retries: 10
-  delay: 20
-  until: r_streams_pod.resources | list | length == 1
+  delay: 10
+  until: kafka_r_pod.resources | list | length == 1
 
 - name: Evaluate Cluster ConfigMap
   kubernetes.core.k8s:
@@ -69,7 +67,7 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    namespace: '{{ kafka_project }}'
+    namespace: '{{ kafka_ns }}'
     resource_definition: "{{ lookup('file', 'metrics-cm.yml') }}"
 
 - name: Evaluate Cluster Instance
@@ -78,24 +76,22 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    namespace: '{{ kafka_project }}'
-    name: '{{ streams_kafka_cluster_name }}'
-    resource_definition: "{{ lookup('file', 'cluster.yml') }}"
+    namespace: '{{ kafka_ns }}'
+    resource_definition: "{{ lookup('template', 'cluster.yml.j2') }}"
 
-# - name: Wait for AMQ Streams cluster to be running
-#   kubernetes.core.k8s_info:
-#     api_key: '{{ token }}'
-#     host: '{{ server }}'
-#     validate_certs: false
-#     api_version: kafka.strimzi.io/v1beta2
-#     kind: Kafka
-#     namespace: '{{ kafka_project }}'
-#     name: '{{ streams_kafka_cluster_name }}'
-#   register: r_kafka
-#   retries: 20
-#   delay: 15
-#   until:
-#     - r_kafka.resources[0] is defined
-#     - r_kafka.resources[0].status is defined
-#     - r_kafka.resources[0].status.conditions[0].type == 'Ready'
-#     - r_kafka.resources[0].status.conditions[0].status == 'True'
+- name: Wait for AMQ Streams cluster to be running
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Pod
+    namespace: '{{ kafka_ns }}'
+    field_selectors:
+      - status.phase=Running
+    label_selectors:
+      - strimzi.io/component-type=kafka-exporter
+  register: kafka_r_pod
+  retries: 20
+  delay: 10
+  until: kafka_r_pod.resources | list | length == 1
