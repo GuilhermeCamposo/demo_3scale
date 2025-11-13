@@ -90,9 +90,9 @@
     namespace: '{{ threescale_project }}'
     resource_definition: "{{ lookup('file', item) }}"
   loop:
+    - 'account.yml'
     - 'user-secret.yml'
     - 'user.yml'
-    - 'account.yml'
 
 - name: Check if Account is Synced
   kubernetes.core.k8s_info:
