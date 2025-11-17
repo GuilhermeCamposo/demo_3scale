@@ -103,10 +103,10 @@
     name: demo-org
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
-  register: r_account
+  register: threescale_r_account
   until:
-    - r_account.resources is defined
-    - r_account.resources[0].status.accountID is defined
+    - threescale_r_account.resources is defined
+    - threescale_r_account.resources[0].status.accountID is defined
   retries: 10
   delay: 15
 
@@ -128,10 +128,10 @@
     name: test-app
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
-  register: r_account
+  register: threescale_r_app
   until:
-    - r_account.resources is defined
-    - r_account.resources[0].status.applicationID is defined
+    - threescale_r_app.resources is defined
+    - threescale_r_app.resources[0].status.applicationID is defined
   retries: 10
   delay: 15
 
@@ -144,33 +144,33 @@
         - token is not none
         - token|trim() != ""
       ignore_errors: false
-      register: my_output
-      changed_when: my_output.rc != 0
+      register: threescale_output
+      changed_when: threescale_output.rc != 0
 
     - name: Config 3scale SMTP address
       ansible.builtin.command: |
         oc patch secret system-smtp -p {%raw%}'{"stringData":{"address":"mailhog.{%endraw%}{{ mailhog_ns }}{%raw%}"}}'{%endraw%} -n {{ threescale_project }}
       ignore_errors: false
-      register: my_output
-      changed_when: my_output.rc != 0
+      register: threescale_output
+      changed_when: threescale_output.rc != 0
 
     - name: Config 3scale SMTP port
       ansible.builtin.command: oc patch secret system-smtp -p {%raw%}'{"stringData":{"port":"1025"}}'{%endraw%} -n {{ threescale_project }}
       ignore_errors: false
-      register: my_output
-      changed_when: my_output.rc != 0
+      register: threescale_output
+      changed_when: threescale_output.rc != 0
 
     - name: Bounce 3scale system-app
       ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=app' -n {{ threescale_project }}"
       ignore_errors: false
-      register: my_output
-      changed_when: my_output.rc != 0
+      register: threescale_output
+      changed_when: threescale_output.rc != 0
 
     - name: Bounce 3scale system-sidekiq
       ansible.builtin.command: "oc delete pod -l 'threescale_component=system,threescale_component_element=sidekiq' -n {{ threescale_project }}"
       ignore_errors: false
-      register: my_output
-      changed_when: my_output.rc != 0
+      register: threescale_output
+      changed_when: threescale_output.rc != 0
 
 
 # - name: Set productId

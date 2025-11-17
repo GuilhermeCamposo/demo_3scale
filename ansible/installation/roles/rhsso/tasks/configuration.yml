@@ -1,17 +1,18 @@
 - name: Set SSO host
   ansible.builtin.set_fact:
-    sso_host: 'keycloak-{{ rhsso_project }}.apps.{{ domain }}'
+    rhsso_host: 'keycloak-{{ rhsso_project }}.apps.{{ domain }}'
 
 - name: Check if Realm exist
   ansible.builtin.uri:
-    url: 'https://{{ sso_host }}/auth/realms/threescale-apps'
+    url: 'https://{{ rhsso_host }}/auth/realms/threescale-apps'
     method: GET
     return_content: true
     validate_certs: '{{ verify_tls }}'
+    status_code: [200, 404, 400]
   register: rhsso_r_check
 
 - name: Configure SSO Realm
-  when: rhsso_r_check.status != 200 
+  when: rhsso_r_check.status != 200
   block:
     - name: Get SSO secret
       kubernetes.core.k8s_info:
@@ -22,24 +23,24 @@
         name: credential-example-keycloak
         namespace: '{{ rhsso_project }}'
         api_version: v1
-      register: r_credential
+      register: rhsso_r_creds
       until:
-        - r_credential.resources is defined
-        - r_credential.resources[0] is defined
+        - rhsso_r_creds.resources is defined
+        - rhsso_r_creds.resources[0] is defined
       retries: 10
       delay: 15
 
     - name: Set admin password
       ansible.builtin.set_fact:
-        rhsso_admin_password: '{{ r_credential.resources[0].data.ADMIN_PASSWORD | b64decode }}'
+        rhsso_admin_password: '{{ rhsso_r_creds.resources[0].data.ADMIN_PASSWORD | b64decode }}'
 
     - name: Set admin username
       ansible.builtin.set_fact:
-        rhsso_admin_username: '{{ r_credential.resources[0].data.ADMIN_USERNAME | b64decode }}'
+        rhsso_admin_username: '{{ rhsso_r_creds.resources[0].data.ADMIN_USERNAME | b64decode }}'
 
     - name: Get SSO admin token
       ansible.builtin.uri:
-        url: 'https://{{ sso_host }}/auth/realms/master/protocol/openid-connect/token'
+        url: 'https://{{ rhsso_host }}/auth/realms/master/protocol/openid-connect/token'
         validate_certs: false
         method: POST
         body:
@@ -56,7 +57,7 @@
 
     - name: Create threescale Realm
       ansible.builtin.uri:
-        url: 'https://{{ sso_host }}/auth/admin/realms'
+        url: 'https://{{ rhsso_host }}/auth/admin/realms'
         method: POST
         body_format: json
         headers:

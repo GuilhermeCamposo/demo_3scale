@@ -33,7 +33,7 @@
       - deployment = mailhog
     field_selectors:
       - status.phase=Running
-  register: r_mailhog_pod
+  register: mailhog_r_pod
   retries: 20
   delay: 10
-  until: r_mailhog_pod.resources | list | length == 1
+  until: mailhog_r_pod.resources | list | length == 1

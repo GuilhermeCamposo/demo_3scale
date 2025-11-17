@@ -29,12 +29,12 @@
     - token is not none
     - token|trim() != ""
   ignore_errors: false
-  register: r_create_token
-  changed_when: r_create_token.rc != 0
+  register: grafana_r_token
+  changed_when: grafana_r_token.rc != 0
 
 - name: Set SA Token
   ansible.builtin.set_fact:
-    grafana_token: "{{ r_create_token.stdout }}"
+    grafana_token: "{{ grafana_r_token.stdout }}"
 
 - name: Evaluate Grafana ServiceAccount permissons
   kubernetes.core.k8s:

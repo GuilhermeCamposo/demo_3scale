@@ -64,7 +64,7 @@
 
     - name: Include 3scale
       ansible.builtin.include_role:
-        name: 3scale
+        name: threescale
         apply:
           tags: [threescale]
       tags: [threescale]

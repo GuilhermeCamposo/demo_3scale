@@ -29,10 +29,10 @@
       - control-plane = controller-manager
     field_selectors:
       - status.phase=Running
-  register: r_3scale_operator_pod
+  register: 3scale_r_operator_pod
   retries: 20
   delay: 10
-  until: r_3scale_operator_pod.resources | list | length == 1
+  until: 3scale_r_operator_pod.resources | list | length == 1
 
 - name: Install Minio
   ansible.builtin.include_role:
@@ -63,10 +63,10 @@
     kind: APIManager
     namespace: '{{ threescale_project }}'
     name: example-apimanager
-  register: api_m
+  register: 3scale_api_m
   until:
-    - api_m is defined
-    - api_m.resources[0].status.deployments.ready[14] is defined
+    - 3scale_api_m is defined
+    - 3scale_api_m.resources[0].status.deployments.ready[14] is defined
   retries: 20
   delay: 30
 
