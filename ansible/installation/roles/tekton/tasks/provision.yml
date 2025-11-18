@@ -29,7 +29,7 @@
       - app = tekton-operator
     field_selectors:
       - status.phase=Running
-  register: r_tekton_pod
+  register: tekton_pod
   retries: 20
   delay: 10
-  until: r_tekton_pod.resources | list | length == 1
+  until: tekton_pod.resources | list | length == 1

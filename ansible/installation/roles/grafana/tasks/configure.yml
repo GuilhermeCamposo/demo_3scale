@@ -7,8 +7,8 @@
     kind: ServiceAccount
     name: grafana-sa
     namespace: '{{ grafana_project }}'
-  register: _cr
-  until: _cr.resources | list | length == 1
+  register: grafana_cr
+  until: grafana_cr.resources | list | length == 1
   retries: 10
   delay: 30
 
@@ -19,8 +19,8 @@
     - token is not none
     - token|trim() != ""
   ignore_errors: false
-  register: r_login
-  changed_when: r_login.rc != 0
+  register: grafana_r_login
+  changed_when: grafana_r_login.rc != 0
 
 - name: Generate Long Live Token for SA
   ansible.builtin.command: "oc create token {{ grafana_sa_name }} --duration=100000h -n {{ grafana_project }}"
