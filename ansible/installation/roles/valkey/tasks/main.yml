@@ -1,0 +1,47 @@
+- name: Evaluate Namespace {{ valkey_ns }}
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Namespace
+    name: '{{ valkey_ns }}'
+    state: present
+
+- name: Evaluate Redis secrets
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    namespace: '{{ valkey_ns }}'
+    resource_definition: "{{ lookup('file', item) }}"
+  loop:
+    - backend-redis-secret.yml
+    - system-redis-secret.yml
+
+- name: Evaluate Valkey Deployment
+  kubernetes.core.k8s:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    state: present
+    namespace: '{{ valkey_ns }}'
+    resource_definition: "{{ lookup('file', 'template.yml') }}"
+
+- name: Wait Valkey Pod
+  kubernetes.core.k8s_info:
+    api_key: '{{ token }}'
+    host: '{{ server }}'
+    validate_certs: false
+    api_version: v1
+    kind: Pod
+    namespace: '{{ valkey_ns }}'
+    label_selectors:
+      - app = valkey
+    field_selectors:
+      - status.phase=Running
+  register: valkey_r_pod
+  retries: 20
+  delay: 10
+  until: valkey_r_pod.resources | list | length == 1

@@ -12,6 +12,7 @@
     kafka_ns: demo-tools
     kafka_cluster_name: my-cluster
     mailhog_ns: demo-tools
+    valkey_ns: demo-3scale
     apicurio_registry_project: demo-tools
     kafka_project: demo-tools
     cicd_project: demo-cicd
