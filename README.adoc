@@ -4,9 +4,9 @@ This repository demonstrates how to use many of 3scale's features.
 
 == Demo Last Tested with
 
-- OCP 4.17
-- oc CLI 4.17
-- 3scale 2.15
+- OCP 4.18
+- oc CLI 4.18
+- 3scale 2.16
 
 
 == 3scale Installation
@@ -79,6 +79,11 @@ image::docs/imgs/search-doc.PNG[Search DOC]
 image::docs/imgs/select-api.PNG[Select API]
 
 == Using the 3scale CLI
+
+[NOTE]
+====
+3scale CLI is deprecated
+====
 
 === Connect to tenants
 

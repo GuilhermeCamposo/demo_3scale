@@ -7,16 +7,16 @@
     name: system-seed
     namespace: '{{ threescale_project }}'
     api_version: v1
-  register: r_system_seed
+  register: threescale_system_seed
   until:
-    - r_system_seed.resources is defined
-    - r_system_seed.resources[0] is defined
+    - threescale_system_seed.resources is defined
+    - threescale_system_seed.resources[0] is defined
   retries: 10
   delay: 15
 
 - name: Set admin token
   ansible.builtin.set_fact:
-    threescale_token: '{{ r_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
+    threescale_token: '{{ threescale_system_seed.resources[0].data.ADMIN_ACCESS_TOKEN | b64decode }}'
 
 - name: Test 3scale API Service
   ansible.builtin.uri:
@@ -26,8 +26,8 @@
     method: GET
     body:
       access_token: '{{ threescale_token }}'
-  register: result
-  until: result.status == 200
+  register: threescale_result
+  until: threescale_result.status == 200
   retries: 10
   delay: 15
 
@@ -49,10 +49,10 @@
     name: database-backend
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
-  register: r_backend
+  register: threescale_backend
   until:
-    - r_backend.resources is defined
-    - r_backend.resources[0].status.backendId is defined
+    - threescale_backend.resources is defined
+    - threescale_backend.resources[0].status.backendId is defined
   retries: 10
   delay: 15
 
@@ -74,10 +74,10 @@
     name: database-api
     namespace: '{{ threescale_project }}'
     api_version: capabilities.3scale.net/v1beta1
-  register: r_product
+  register: threescale_product
   until:
-    - r_product.resources is defined
-    - r_product.resources[0].status.productId is defined
+    - threescale_product.resources is defined
+    - threescale_product.resources[0].status.productId is defined
   retries: 10
   delay: 15
 

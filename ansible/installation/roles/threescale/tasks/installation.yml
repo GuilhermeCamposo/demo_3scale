@@ -79,10 +79,10 @@
       - statefulset.kubernetes.io/pod-name = zync-postgresql-db-0
     field_selectors:
       - status.phase=Running
-  register: r_minio_pod
+  register: threescale_db_pod
   retries: 20
   delay: 10
-  until: r_minio_pod.resources | list | length == 1
+  until: threescale_db_pod.resources | list | length == 1
 
 - name: Evaluate System database
   kubernetes.core.k8s:
@@ -109,10 +109,10 @@
       - statefulset.kubernetes.io/pod-name = system-postgresql-db-0
     field_selectors:
       - status.phase=Running
-  register: r_minio_pod
+  register: threescale_db_pod
   retries: 20
   delay: 10
-  until: r_minio_pod.resources | list | length == 1
+  until: threescale_db_pod.resources | list | length == 1
 
 - name: Evaluate 3scale Operator s3-secret
   kubernetes.core.k8s:
@@ -152,7 +152,7 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    resource_definition: "{{ lookup('template', 'uat_admin_secret.yml.j2') }}"
+    resource_definition: "{{ lookup('template', 'uat-admin-secret.yml.j2') }}"
 
 - name: Evaluate UAT Tenant
   kubernetes.core.k8s:
@@ -160,4 +160,4 @@
     host: '{{ server }}'
     validate_certs: false
     state: present
-    resource_definition: "{{ lookup('template', 'uat_tenant.yml.j2') }}"
+    resource_definition: "{{ lookup('template', 'uat-tenant.yml.j2') }}"
