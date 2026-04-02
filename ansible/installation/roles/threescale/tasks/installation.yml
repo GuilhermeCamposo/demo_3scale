@@ -10,77 +10,77 @@
 
 - name: Prepare databases
   block:
-  - name: Evaluate db keys
-    kubernetes.core.k8s:
-      api_key: '{{ token }}'
-      host: '{{ server }}'
-      validate_certs: false
-      state: present
-      namespace: '{{ threescale_project }}'
-      resource_definition: "{{ lookup('file', item) }}"
-    loop:
-    - system-database-secret.yml
-    - zync-secret.yml
+    - name: Evaluate db keys
+      kubernetes.core.k8s:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        state: present
+        namespace: '{{ threescale_project }}'
+        resource_definition: "{{ lookup('file', item) }}"
+      loop:
+        - system-database-secret.yml
+        - zync-secret.yml
 
-  - name: Evaluate Zync database
-    kubernetes.core.k8s:
-      api_key: '{{ token }}'
-      host: '{{ server }}'
-      validate_certs: false
-      state: present
-      namespace: '{{ threescale_project }}'
-      resource_definition: "{{ lookup('template', 'postgresdb.yml.j2') }}"
-    vars:
-      database_name: zync_production
-      service_name: zync
+    - name: Evaluate Zync database
+      kubernetes.core.k8s:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        state: present
+        namespace: '{{ threescale_project }}'
+        resource_definition: "{{ lookup('template', 'postgresdb.yml.j2') }}"
+      vars:
+        database_name: zync_production
+        service_name: zync
 
-  - name: Waiting for Zync Postgresdb instance to be running
-    kubernetes.core.k8s_info:
-      api_key: '{{ token }}'
-      host: '{{ server }}'
-      validate_certs: false
-      api_version: v1
-      kind: Pod
-      namespace: '{{ threescale_project }}'
-      label_selectors:
-        - app = zync-postgresql-db
-        - statefulset.kubernetes.io/pod-name = zync-postgresql-db-0
-      field_selectors:
-        - status.phase=Running
-    register: threescale_db_pod
-    retries: 20
-    delay: 10
-    until: threescale_db_pod.resources | list | length == 1
+    - name: Waiting for Zync Postgresdb instance to be running
+      kubernetes.core.k8s_info:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        api_version: v1
+        kind: Pod
+        namespace: '{{ threescale_project }}'
+        label_selectors:
+          - app = zync-postgresql-db
+          - statefulset.kubernetes.io/pod-name = zync-postgresql-db-0
+        field_selectors:
+          - status.phase=Running
+      register: threescale_db_pod
+      retries: 20
+      delay: 10
+      until: threescale_db_pod.resources | list | length == 1
 
-  - name: Evaluate System database
-    kubernetes.core.k8s:
-      api_key: '{{ token }}'
-      host: '{{ server }}'
-      validate_certs: false
-      state: present
-      namespace: '{{ threescale_project }}'
-      resource_definition: "{{ lookup('template', 'postgresdb.yml.j2') }}"
-    vars:
-      database_name: system
-      service_name: system
+    - name: Evaluate System database
+      kubernetes.core.k8s:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        state: present
+        namespace: '{{ threescale_project }}'
+        resource_definition: "{{ lookup('template', 'postgresdb.yml.j2') }}"
+      vars:
+        database_name: system
+        service_name: system
 
-  - name: Waiting for System Postgresdb instance to be running
-    kubernetes.core.k8s_info:
-      api_key: '{{ token }}'
-      host: '{{ server }}'
-      validate_certs: false
-      api_version: v1
-      kind: Pod
-      namespace: '{{ threescale_project }}'
-      label_selectors:
-        - app = system-postgresql-db
-        - statefulset.kubernetes.io/pod-name = system-postgresql-db-0
-      field_selectors:
-        - status.phase=Running
-    register: threescale_db_pod
-    retries: 20
-    delay: 10
-    until: threescale_db_pod.resources | list | length == 1
+    - name: Waiting for System Postgresdb instance to be running
+      kubernetes.core.k8s_info:
+        api_key: '{{ token }}'
+        host: '{{ server }}'
+        validate_certs: false
+        api_version: v1
+        kind: Pod
+        namespace: '{{ threescale_project }}'
+        label_selectors:
+          - app = system-postgresql-db
+          - statefulset.kubernetes.io/pod-name = system-postgresql-db-0
+        field_selectors:
+          - status.phase=Running
+      register: threescale_db_pod
+      retries: 20
+      delay: 10
+      until: threescale_db_pod.resources | list | length == 1
 
 - name: Evaluate 3scale Operator
   kubernetes.core.k8s:
